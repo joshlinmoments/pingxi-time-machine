@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>平溪老街 AI 時光機 · 回到平溪那年</title>
+<style>
+/* ============ Design tokens：保留「回到平溪那年」墨綠品牌 × 現代化高對比 ============ */
+:root{
+  --ink:#141f19; --pine:#2f4a3d; --pine-deep:#1d3128; --pine-soft:#3f6151;
+  --cream:#f4efe0; --paper:#faf6ea; --gold:#ffcf3f; --gold-deep:#e8b220; --brick:#c0432c;
+  --line:rgba(20,31,25,.12); --shadow:0 10px 30px rgba(20,31,25,.18); --r:20px;
+  --font: "PingFang TC","Noto Sans TC","Heiti TC","Microsoft JhengHei",system-ui,sans-serif;
+  --serif: "Songti TC","Noto Serif TC","PingFang TC",serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:var(--font);color:var(--cream);background:var(--ink);line-height:1.6;overscroll-behavior-y:none}
+img{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer;border:0}
+
+#app{max-width:480px;margin:0 auto;min-height:100dvh;
+  background:radial-gradient(140% 60% at 50% -10%, rgba(63,97,81,.55), transparent 60%),var(--ink);
+  position:relative;overflow:hidden;display:flex;flex-direction:column}
+.screen{display:none;flex:1;flex-direction:column;animation:fade .45s ease}
+.screen.on{display:flex}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* 頂部進度 */
+#topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;
+  padding:12px 16px calc(12px + env(safe-area-inset-top,0));background:linear-gradient(var(--pine-deep),rgba(29,49,40,0))}
+#topbar.hidden{display:none}
+.brand-mini{font-family:var(--serif);font-weight:700;font-size:15px;letter-spacing:1px;color:var(--cream)}
+.brand-mini small{display:block;font-family:var(--font);font-weight:400;font-size:9px;letter-spacing:2px;color:var(--gold);opacity:.85}
+.dots{display:flex;gap:5px;margin-left:auto}
+.dots i{width:8px;height:8px;border-radius:50%;background:rgba(244,239,224,.25);transition:.3s}
+.dots i.done{background:var(--gold)}
+.dots i.now{background:var(--gold);box-shadow:0 0 0 3px rgba(255,207,63,.28)}
+.bag-btn{width:40px;height:40px;border-radius:12px;background:rgba(244,239,224,.12);color:var(--cream);
+  font-size:18px;display:grid;place-items:center;position:relative}
+.bag-btn .n{position:absolute;top:-4px;right:-4px;background:var(--brick);color:#fff;font-size:10px;
+  min-width:16px;height:16px;border-radius:9px;display:grid;place-items:center;padding:0 3px;font-weight:700}
+
+/* 封面 */
+#cover{justify-content:space-between;padding:0}
+.cover-hero{position:relative;flex:1;min-height:52dvh;overflow:hidden;display:flex;align-items:flex-end}
+.cover-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover-hero::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(20,31,25,.15) 0%,rgba(20,31,25,.35) 45%,var(--ink) 98%)}
+.cover-title{position:relative;z-index:2;padding:0 26px 6px}
+.cover-title .zh{font-family:var(--serif);font-weight:700;font-size:44px;line-height:1.05;
+  letter-spacing:3px;color:var(--cream);text-shadow:0 2px 18px rgba(0,0,0,.5)}
+.cover-title .zh b{color:var(--gold)}
+.cover-title .en{font-size:11px;letter-spacing:4px;color:var(--cream);opacity:.8;margin-top:8px}
+.cover-body{padding:20px 26px calc(26px + env(safe-area-inset-bottom,0));text-align:center}
+.cover-body .tag{display:inline-block;font-size:11px;letter-spacing:3px;color:var(--gold);
+  border:1px solid rgba(255,207,63,.5);border-radius:99px;padding:5px 14px;margin-bottom:16px}
+.cover-body p{color:rgba(244,239,224,.75);font-size:14px;margin:0 0 20px}
+.cta{width:100%;padding:17px;border-radius:16px;background:var(--gold);color:var(--pine-deep);font-weight:800;
+  font-size:17px;letter-spacing:2px;box-shadow:0 8px 24px rgba(255,207,63,.3);transition:transform .12s ease, box-shadow .2s}
+.cta:active{transform:translateY(2px) scale(.99);box-shadow:0 3px 12px rgba(255,207,63,.3)}
+.cta.ghost{background:transparent;color:var(--cream);border:1.5px solid rgba(244,239,224,.35);box-shadow:none}
+
+/* 對話舞台 */
+.stage-wrap{flex:1;display:flex;flex-direction:column;padding:4px 16px 0}
+.stage-head{padding:6px 2px 14px}
+.stage-head .no{font-family:var(--serif);font-size:13px;color:var(--gold);letter-spacing:2px;font-weight:700}
+.stage-head .zh{font-family:var(--serif);font-size:26px;font-weight:700;letter-spacing:1px;color:var(--cream);line-height:1.2}
+.stage-head .en{font-size:10px;letter-spacing:3px;color:rgba(244,239,224,.55);margin-top:3px;text-transform:uppercase}
+.chat{flex:1;display:flex;flex-direction:column;gap:12px;padding:6px 0 8px}
+.msg{display:flex;gap:10px;align-items:flex-end;opacity:0;transform:translateY(10px);animation:pop .35s ease forwards}
+@keyframes pop{to{opacity:1;transform:none}}
+.avatar{width:40px;height:40px;border-radius:50%;flex:0 0 40px;background:var(--gold);display:grid;
+  place-items:center;overflow:hidden;box-shadow:var(--shadow);border:2px solid var(--gold)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.bubble{background:var(--paper);color:var(--ink);padding:11px 14px;border-radius:16px 16px 16px 4px;
+  font-size:15px;max-width:78%;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.bubble.narr{background:rgba(244,239,224,.08);color:rgba(244,239,224,.82);font-style:italic;border-radius:12px;
+  font-size:13.5px;max-width:100%;box-shadow:none;border:1px dashed rgba(244,239,224,.18)}
+.name{font-size:11px;color:var(--gold);margin:0 0 3px 48px;letter-spacing:1px}
+
+/* 時光機場景卡 */
+.scene{margin:4px 0;border-radius:18px;overflow:hidden;position:relative;box-shadow:var(--shadow);
+  opacity:0;transform:scale(.96);animation:pop .5s ease forwards}
+.scene img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.scene .ph{width:100%;aspect-ratio:16/10;display:grid;place-items:center;text-align:center;padding:20px;
+  background:linear-gradient(135deg,var(--pine-soft),var(--pine-deep));position:relative}
+.scene .ph .ic{font-size:40px}.scene .ph .lb{font-size:12px;color:rgba(244,239,224,.7);margin-top:8px;letter-spacing:1px}
+.scene .cap{position:absolute;left:0;right:0;bottom:0;padding:22px 14px 12px;
+  background:linear-gradient(transparent,rgba(20,31,25,.85));font-size:12px;letter-spacing:1px}
+.scene .cap b{color:var(--gold)}
+.scene .aitag{position:absolute;top:10px;left:10px;font-size:9px;letter-spacing:1px;
+  background:rgba(20,31,25,.6);color:var(--gold);padding:3px 8px;border-radius:99px;backdrop-filter:blur(4px)}
+
+/* 任務卡 & 互動 */
+.task{background:rgba(244,239,224,.08);border:1px solid var(--line);border-left:4px solid var(--gold);
+  border-radius:14px;padding:14px 15px;margin:6px 0;opacity:0;transform:translateY(10px);animation:pop .4s ease forwards}
+.task h4{margin:0 0 8px;font-size:12px;letter-spacing:2px;color:var(--gold)}
+.q{font-size:15px;font-weight:600;margin:2px 0 10px;color:var(--cream)}
+.sense{display:flex;gap:8px;background:rgba(255,207,63,.08);border:1px solid rgba(255,207,63,.3);
+  border-radius:12px;padding:11px 13px;margin:4px 0 10px;font-size:14.5px;color:var(--cream)}
+.sense .ic{flex:0 0 auto}
+.field{margin:10px 0}
+.field label{display:block;font-size:12px;color:rgba(244,239,224,.7);margin-bottom:6px;letter-spacing:1px}
+.field input{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid rgba(244,239,224,.2);
+  background:rgba(244,239,224,.06);color:var(--cream);font-size:16px;font-family:inherit}
+.field input:focus{outline:none;border-color:var(--gold);background:rgba(255,207,63,.06)}
+.mini-inputs{display:flex;gap:8px}.mini-inputs input{text-align:center;letter-spacing:4px}
+.reveal{background:rgba(255,207,63,.1);border:1px dashed rgba(255,207,63,.5);border-radius:12px;
+  padding:11px 13px;margin-top:10px;font-size:13.5px;color:var(--cream)}
+.reveal b{color:var(--gold)}.reveal .ok{color:#7fdca0}
+.reveal.wrong{background:rgba(192,67,44,.15);border-color:rgba(192,67,44,.55)}
+.reveal.wrong b{color:#ff9c85}
+.reveal.right{background:rgba(127,220,160,.14);border-color:rgba(127,220,160,.5)}
+.field input.bad{border-color:var(--brick);background:rgba(192,67,44,.1)}
+.note-josh{font-size:11px;color:rgba(255,207,63,.7);margin-top:6px}
+
+/* 拍照加入相簿 */
+.photo-cap{background:rgba(63,97,81,.22);border:1px dashed rgba(244,239,224,.28);border-radius:14px;
+  padding:12px 13px;margin:12px 0 4px}
+.photo-cap .pc-head{font-size:12px;letter-spacing:1px;color:var(--gold);margin-bottom:4px}
+.photo-cap .pc-prompt{font-size:13.5px;color:rgba(244,239,224,.85);margin-bottom:10px}
+.photo-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;margin-bottom:10px;border:2px solid var(--gold)}
+.pc-btn{display:block;text-align:center;padding:12px;border-radius:12px;background:rgba(244,239,224,.12);
+  color:var(--cream);font-weight:700;font-size:14px;border:1px solid rgba(244,239,224,.25)}
+.pc-btn:active{transform:translateY(1px)}
+
+.btn{width:100%;padding:15px;border-radius:14px;background:var(--gold);color:var(--pine-deep);font-weight:800;
+  font-size:16px;letter-spacing:2px;margin-top:8px;transition:transform .12s}
+.btn:active{transform:translateY(2px)}.btn:disabled{opacity:.4}
+.btn.ghost{background:transparent;color:var(--cream);border:1.5px solid rgba(244,239,224,.3)}
+.btn.brick{background:var(--brick);color:#fff}
+
+.next-hint{background:var(--pine-deep);border-radius:14px;padding:14px 15px;margin:10px 0 4px;border:1px solid var(--line)}
+.next-hint .k{font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:5px}
+.next-hint .v{font-size:15px;color:var(--cream);font-family:var(--serif)}
+.pad{padding:12px 16px calc(20px + env(safe-area-inset-bottom,0))}
+.hidden{display:none!important}
+
+/* 相簿抽屜 */
+#bag{position:fixed;inset:0;z-index:40;display:none;align-items:flex-end;justify-content:center}
+#bag.on{display:flex}
+#bag .bg{position:absolute;inset:0;background:rgba(10,16,12,.6);backdrop-filter:blur(3px)}
+#bag .sheet{position:relative;width:100%;max-width:480px;background:var(--pine-deep);border-radius:24px 24px 0 0;
+  padding:18px 20px calc(26px + env(safe-area-inset-bottom,0));animation:up .3s ease;max-height:82dvh;overflow:auto}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+#bag h3{margin:0 0 4px;font-family:var(--serif);font-size:20px}
+#bag .sub{font-size:12px;color:rgba(244,239,224,.6);margin-bottom:14px}
+.album-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.album-cell{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:4/3;
+  background:linear-gradient(135deg,var(--pine-soft),var(--pine-deep));border:1px solid var(--line)}
+.album-cell img{width:100%;height:100%;object-fit:cover}
+.album-cell .empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;
+  color:rgba(244,239,224,.5);font-size:12px;padding:8px}
+.album-cell .tag{position:absolute;left:0;right:0;bottom:0;padding:12px 8px 6px;font-size:10px;letter-spacing:1px;
+  background:linear-gradient(transparent,rgba(20,31,25,.85));color:var(--cream)}
+
+/* 榮譽狀 + 明信片 */
+#finale{align-items:center;text-align:center;padding:26px 20px calc(30px + env(safe-area-inset-bottom,0));overflow:auto}
+.cert{background:linear-gradient(160deg,#5b7d69,var(--pine-deep));border:2px solid var(--gold);border-radius:22px;
+  padding:26px 22px;width:100%;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.cert::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 40% at 50% 0,rgba(255,207,63,.2),transparent 70%)}
+.cert .seal{font-size:42px}
+.cert .h{font-family:var(--serif);font-size:24px;font-weight:700;margin:8px 0 4px;color:var(--cream)}
+.cert .en{font-size:10px;letter-spacing:3px;color:var(--gold);margin-bottom:16px}
+.cert .who{font-size:14px;color:rgba(244,239,224,.8)}
+.cert .who b{color:var(--gold);font-size:22px;display:block;font-family:var(--serif);margin:4px 0 2px}
+.cert .stamps{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:16px 0 2px}
+.cert .stamps i{font-size:18px}
+.postcard-wrap{width:100%;margin-top:20px}
+.postcard-wrap h3{font-family:var(--serif);font-size:18px;margin:0 0 4px}
+.postcard-wrap .sub{font-size:12px;color:rgba(244,239,224,.6);margin-bottom:12px}
+#postcard{width:100%;border-radius:14px;box-shadow:var(--shadow);background:var(--pine-deep)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 頂部進度 -->
+  <div id="topbar" class="hidden">
+    <div class="brand-mini">回到平溪那年<small>BACK TO PINGXI</small></div>
+    <div class="dots" id="dots"></div>
+    <button class="bag-btn" onclick="openBag()">📸<span class="n hidden" id="bagN">0</span></button>
+  </div>
+
+  <!-- 封面 -->
+  <section class="screen on" id="cover">
+    <div class="cover-hero">
+      <img id="coverImg" alt="回到平溪那年">
+      <div class="cover-title">
+        <div class="zh">回到<b>平溪</b>那年</div>
+        <div class="en">PINGXI OLD STREET · AI TIME MACHINE</div>
+      </div>
+    </div>
+    <div class="cover-body">
+      <span class="tag">平溪老街 AI 時光機</span>
+      <p>跟著平溪最強嚮導「小葉」，一站一站走進老街，<br>用五感與相機，穿越回到平溪的那些年。</p>
+      <button class="cta" onclick="go('intro')">開始尋寶 →</button>
+    </div>
+  </section>
+
+  <!-- 動態關卡舞台 -->
+  <section class="screen" id="play">
+    <div class="stage-wrap">
+      <div class="stage-head">
+        <div class="no" id="sNo"></div>
+        <div class="zh" id="sZh"></div>
+        <div class="en" id="sEn"></div>
+      </div>
+      <div class="chat" id="chat"></div>
+    </div>
+    <div class="pad"><button class="btn" id="advance" onclick="advance()">繼續 ▾</button></div>
+  </section>
+
+  <!-- 榮譽狀 + 明信片 -->
+  <section class="screen" id="finale">
+    <div class="cert">
+      <div class="seal">🏅</div>
+      <div class="h">平溪榮譽探險家</div>
+      <div class="en">HONORARY EXPLORER OF PINGXI</div>
+      <div class="who">茲證明探險家<b id="certName">—</b>已走完回到平溪那年的全部旅程</div>
+      <div class="stamps" id="certStamps"></div>
+    </div>
+
+    <div class="postcard-wrap">
+      <h3>🖼️ 你的平溪明信片</h3>
+      <div class="sub">用你一路拍下的照片，自動拼成一張回憶明信片</div>
+      <canvas id="postcard" width="1000" height="1640"></canvas>
+    </div>
+
+    <div style="width:100%;margin-top:18px">
+      <button class="btn" id="dlBtn" onclick="downloadPostcard()">⬇️ 儲存明信片</button>
+      <button class="btn ghost" onclick="openBag()">📸 查看我的平溪相簿</button>
+      <button class="btn ghost" onclick="restart()">重新開始</button>
+    </div>
+  </section>
+
+  <!-- 相簿抽屜 -->
+  <div id="bag">
+    <div class="bg" onclick="closeBag()"></div>
+    <div class="sheet">
+      <h3>📸 我的平溪相簿</h3>
+      <div class="sub">一路走過的真實平溪，都收在這裡</div>
+      <div class="album-grid" id="bagGrid"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   平溪老街 AI 時光機 — v2 原型
+   · 對話式「AI 小葉」腳本引擎（之後可無痛換真 LLM）
+   · 現場走讀輔助：感官/在地任務 + 選拍照片（存本機、自動壓縮）
+   · 道具系統 → 我的平溪相簿；結尾自動拼貼明信片
+   ========================================================= */
+
+const XIAOYE="slides/generated/xiaoye-avatar3_20260817_205712.png";
+const SCENE_IMG={
+  1:"slides/generated/scene1-station-v4_20260817_205840.png",
+  2:"slides/generated/scene2b-store_20260817_210151.png",
+  3:"slides/generated/scene3b-dept_20260817_210243.png",
+  4:"slides/generated/scene4b-temple_20260817_210345.png",
+  5:"slides/generated/scene5b-seek_20260817_210449.png",
+  6:"slides/generated/scene6b-fabric_20260817_210543.png",
+  7:"slides/generated/scene7b-taro_20260817_210639.png",
+};
+
+/* ---------- 關卡資料 ----------
+   task.sense    : 感官/在地任務（要在現場做）
+   task.observe  : 選填的觀察輸入
+   photo         : 選拍（prompt=拍什麼, label=相簿標題）
+------------------------------------------------------------ */
+const STAGES=[
+ {n:1, zh:"啟程尋寶", en:"Departure · Pingxi Station", place:"平溪火車站",
+  scene:{icon:"🚂", label:"平溪火車站 · 那年", cap:"火車鳴笛，你踏上<b>回到平溪</b>的月台"},
+  chat:[
+    {t:"narr", x:"「歡迎來到平溪！」火車的鳴笛聲還在耳邊。"},
+    {t:"ye", x:"嗨，我叫小葉，我要帶你展開一場尋寶冒險！"},
+    {t:"ye", x:"我可是平溪最強嚮導！走出車站，先認識一下這座山城吧，準備好了嗎？"},
+  ],
+  task:{title:"任務 MISSION",
+    sense:"走出車站，聽聽看有沒有火車的鳴笛聲，找到寫著「平溪」的站名牌。",
+    intro:"先幫自己取一個探險代號，然後就出發吧！",
+    inputs:[{key:"codename", label:"你的探險代號", ph:"例如：時光小旅人"}],
+    submitText:"寫好了，出發！"},
+  photo:{prompt:"拍下月台或站名牌，當作旅程的第一張照片。", label:"平溪車站"},
+  hint:"牆壁上開滿花的那家店，是個 24 小時不打烊的地方！"},
+
+ {n:2, zh:"24 小時雜貨店", en:"The 24hr Store · 成盈利商店", place:"成盈利商店",
+  scene:{icon:"🏮", label:"成盈利商店 · 那年", cap:"深夜的<b>避風港</b>，牆上貼滿舊報紙與懷舊糖果廣告"},
+  chat:[
+    {t:"ye", x:"這是我從小最常來的地方！老闆笑著迎接我們～"},
+    {t:"ye", x:"看似平凡，卻是咱們平溪專屬的『24 小時便利商店』喔！"},
+  ],
+  task:{title:"任務 MISSION",
+    sense:"在店裡找找看牆上最老的一張廣告或糖果海報——它在賣什麼？",
+    observe:{key:"s2", label:"你找到的是（選填）", ph:"例如：一張古早的糖果廣告"},
+    reveal:"小葉：因為只要敲敲門，老闆隨時都會起來開門——對老平溪人來說，它<b>什麼時候都在</b>，比便利商店還可靠！",
+    submitText:"完成，繼續前進"},
+  photo:{prompt:"拍下你找到的懷舊糖果、舊招牌或舊廣告。", label:"24小時雜貨店"},
+  hint:"平溪人的百貨公司，那裡有我媽媽最愛的萬金油～"},
+
+ {n:3, zh:"平溪的百貨公司", en:"Department Store · 新建成百貨行", place:"新建成百貨行",
+  scene:{icon:"🛍️", label:"新建成百貨行 · 那年", cap:"店裡<b>什麼都賣</b>，從針線到萬金油，應有盡有"},
+  chat:[
+    {t:"narr", x:"百貨行的老闆娘笑盈盈地迎接你，店內擺滿各式各樣的生活用品。"},
+    {t:"ye", x:"這家店啊，從針線到萬金油，什麼都有！"},
+    {t:"ye", x:"找找看，一定有讓你意想不到的東西～"},
+  ],
+  task:{title:"任務 MISSION",
+    sense:"在店裡找出一樣「連這個都有賣！」最讓你意外的東西。",
+    observe:{key:"s3", label:"最意外的一樣是（選填）", ph:"例如：連這個都有…"},
+    reveal:"小葉：在物資不便的年代，這一家店就包辦了平溪人的<b>食衣住行</b>，簡直就是山城裡的百貨公司！",
+    submitText:"完成，繼續前進"},
+  photo:{prompt:"拍下虎標萬金油，或店裡「什麼都賣」的一角。", label:"平溪百貨行"},
+  hint:"有觀音、有香火，還有我最敬愛的乾媽。"},
+
+ {n:4, zh:"乾媽的家", en:"Godmother's Home · 觀音巖", place:"觀音巖",
+  scene:{icon:"🙏", label:"觀音巖 · 那年", cap:"香火裊裊，<b>觀音媽</b>的慈眼注視著你"},
+  chat:[
+    {t:"narr", x:"香火裊裊，觀音媽的慈眼注視著你。"},
+    {t:"ye", x:"觀音媽是我們平溪人的大乾媽，沒有祂，就沒有平溪。"},
+  ],
+  task:{title:"任務 MISSION",
+    sense:"抬頭讀讀廟門兩側的對聯——它藏了「觀・音」兩個字喔！找出缺的兩個字。",
+    q:"幫忙補上對聯缺的字：",
+    couplet:["觀望平溪勝地靈光　◯◯","音傳蓮座楊柳甘露　◯◯"],
+    inputs:[
+      {key:"c1", label:"靈光 ◯◯", ph:"◯◯", mini:true, accept:["普照"], confirmed:false},
+      {key:"c2", label:"甘露 ◯◯", ph:"◯◯", mini:true, accept:["均霑","均沾"], confirmed:false}],
+    reveal:"小葉：這是嵌了「<b>觀・音</b>」二字的冠頭聯呢！",
+    joshNote:"※ 對聯正解待 Josh 確認；確認前這兩格暫不強制判對錯。",
+    submitText:"對好對聯，繼續"},
+  photo:{prompt:"拍下這副對聯，或觀音巖的香爐與廟埕。", label:"觀音巖"},
+  hint:"接下來，玩我們平溪小孩最愛的遊戲——躲貓貓！"},
+
+ {n:5, zh:"躲貓貓", en:"Hide & Seek · 平溪後山", place:"平溪後山",
+  scene:{icon:"🗺️", label:"平溪後山 · 那年", cap:"沿著山徑，找出躲起來的<b>三個好朋友</b>"},
+  chat:[
+    {t:"ye", x:"欸～等等，我要考考你！玩我們平溪人從小玩到大的遊戲——躲貓貓！"},
+    {t:"ye", x:"我和兩個好朋友芸芸、阿任都藏起來了，看你找不找得到我們！"},
+  ],
+  task:{title:"任務 MISSION",
+    sense:"沿著山徑走，走到能聽見廟裡鐘聲、看得最遠的地方，找出三個藏身的山洞。",
+    q:"根據線索，找出三位角色的藏身處：",
+    seek:[
+      {who:"芸芸", clue:"躲在廟旁邊的洞裡，那裡有八位神仙。", ans:"八仙洞", key:"k1", accept:["八仙洞","八仙"], confirmed:true},
+      {who:"阿任", clue:"藏在連續幾個黑暗山洞裡，是避難的地方唷！", ans:"防空洞", key:"k2", accept:["防空洞","防空"], confirmed:true},
+      {who:"小葉", clue:"躲的地方能聽見鐘聲，是整個平溪的最高處。", ans:"（最高處・待確認）", key:"k3", accept:[], confirmed:false},
+    ],
+    joshNote:"※ 芸芸=八仙洞、阿任=防空洞 已開嚴格判定；小葉的最高處正解待 Josh 確認前暫不強制。",
+    submitText:"全部找到了！"},
+  photo:{prompt:"拍下你找到的最高處風景，或一個山洞洞口。", label:"平溪後山"},
+  hint:"沿著老街走，找到門牌號碼 40 的工作室。"},
+
+ {n:6, zh:"做新衫", en:"New Year Clothes · 美雲布藝工作室", place:"美雲布藝工作室（門牌 40）",
+  scene:{icon:"🧵", label:"美雲布藝工作室 · 那年", cap:"桌上滿是<b>色彩繽紛</b>的布料與針線，牆上掛著平溪芋圓的照片"},
+  chat:[
+    {t:"narr", x:"太陽漸漸西下，布店裡的燈光暖暖的。"},
+    {t:"ye", x:"美雲阿姨，我帶朋友來啦！"},
+    {t:"ye", x:"美雲阿姨笑著說：新年快到了，要不要來件新衣？每年平溪人過年前都會來我這兒量身呢！"},
+  ],
+  task:{title:"任務 MISSION",
+    sense:"摸摸看桌上幾種不同觸感的布料，挑一種你最喜歡的顏色或花紋。",
+    observe:{key:"s6", label:"你最喜歡的布是（選填）", ph:"例如：桃紅色的碎花布"},
+    reveal:"小葉：過年穿新衣是老平溪最重要的儀式感——一整年的辛勞，就用一件<b>合身的新衫</b>迎接新年！",
+    submitText:"完成，繼續前進"},
+  photo:{prompt:"拍下繽紛的布料，或跟美雲阿姨合照。", label:"美雲布藝"},
+  hint:"完成所有任務！小葉要請你吃平溪最道地的芋圓～"},
+
+ {n:7, zh:"小葉請客吃芋圓", en:"Finale · Pingxi Taro Balls", place:"平溪芋圓",
+  scene:{icon:"🍧", label:"平溪芋圓 · 慢時光", cap:"熱騰騰的<b>平溪芋圓</b>，是旅程最甜的句點"},
+  chat:[
+    {t:"narr", x:"午後的陽光灑在木窗上，小葉、芸芸、阿任都在等你。"},
+    {t:"ye", x:"恭喜你完成全部的任務！走，我請客——來吃碗平溪最道地的芋圓！"},
+    {t:"ye", x:"現在，你就是平溪的榮譽探險家啦！"},
+  ],
+  task:{title:"任務 MISSION",
+    sense:"嚐一口熱騰騰的芋圓，好好感受它 QQ 的口感——用一個詞形容它的味道吧！",
+    observe:{key:"s7", label:"芋圓的味道是（選填）", ph:"例如：軟糯、古早味、甜而不膩"},
+    submitText:"太幸福了！領取榮譽"},
+  photo:{prompt:"拍下你的芋圓，或跟小葉、芸芸、阿任的合照。", label:"小葉請客吃芋圓"},
+  final:true},
+];
+
+/* ---------- 狀態 ---------- */
+const SAVE="pingxi_time_machine_v2";
+let S=load();
+function load(){try{const o=JSON.parse(localStorage.getItem(SAVE));return o&&o.album?o:fresh();}catch(e){return fresh();}}
+function fresh(){return {codename:"",stage:1,answers:{},album:{},stamps:[]};}
+function save(){try{localStorage.setItem(SAVE,JSON.stringify(S));}catch(e){/* 容量滿時忽略，不中斷遊戲 */}}
+
+/* ---------- 導覽 ---------- */
+function go(where){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('topbar').classList.toggle('hidden', where==='cover');
+  if(where==='cover'){document.getElementById('cover').classList.add('on');return;}
+  if(where==='intro'){ S.stage=Math.max(S.stage,1); save(); renderStage(); return; }
+  if(where==='finale'){ document.getElementById('finale').classList.add('on'); renderCert(); buildPostcard(); renderDots(); window.scrollTo(0,0); return; }
+}
+
+/* ---------- 進度點 + 相簿數 ---------- */
+function renderDots(){
+  const d=document.getElementById('dots');d.innerHTML='';
+  for(let i=1;i<=7;i++){const el=document.createElement('i');
+    if(i<S.stage||S.done)el.className='done'; if(i===S.stage&&!S.done)el.className='now'; d.appendChild(el);}
+  const n=Object.keys(S.album).length;const bn=document.getElementById('bagN');
+  bn.textContent=n;bn.classList.toggle('hidden',n===0);
+}
+
+/* ---------- 舞台渲染 ---------- */
+function renderStage(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('play').classList.add('on');
+  document.getElementById('topbar').classList.remove('hidden');
+  const st=STAGES[S.stage-1];
+  document.getElementById('sNo').textContent="第 "+st.n+" 關 / STAGE "+st.n;
+  document.getElementById('sZh').textContent=st.zh;
+  document.getElementById('sEn').textContent=st.en;
+  const chat=document.getElementById('chat');chat.innerHTML='';
+  document.getElementById('advance').classList.remove('hidden');
+  document.getElementById('advance').textContent="繼續 ▾";
+  renderDots();
+  playChat(st,0,chat);
+  window.scrollTo(0,0);
+}
+
+let PLAY_QUEUE=[];
+function playChat(st, idx, chat){
+  if(idx>=st.chat.length){ showScene(st,chat); return; }
+  const m=st.chat[idx];
+  if(m.t!=='narr'){const nm=document.createElement('div');nm.className='name';nm.textContent='小葉';chat.appendChild(nm);}
+  const row=document.createElement('div');row.className='msg';
+  row.innerHTML=(m.t==='narr'
+     ? `<div class="bubble narr">${m.x}</div>`
+     : `<div class="avatar"><img src="${XIAOYE}" alt="小葉"></div><div class="bubble">${m.x}</div>`);
+  chat.appendChild(row);scrollChat();
+  PLAY_QUEUE=[()=>playChat(st,idx+1,chat)];
+}
+function showScene(st,chat){
+  const sc=document.createElement('div');sc.className='scene';const img=SCENE_IMG[st.n];
+  sc.innerHTML = img
+    ? `<span class="aitag">AI 時光機影像</span><img src="${img}" alt=""><div class="cap">${st.scene.cap}</div>`
+    : `<span class="aitag">AI 影像</span><div class="ph"><div><div class="ic">${st.scene.icon}</div><div class="lb">${st.scene.label}</div></div></div><div class="cap">${st.scene.cap}</div>`;
+  chat.appendChild(sc);scrollChat();
+  PLAY_QUEUE=[()=>showTask(st,chat)];
+}
+
+/* ---------- 任務互動 ---------- */
+function showTask(st,chat){
+  document.getElementById('advance').classList.add('hidden');
+  const t=st.task; const box=document.createElement('div');box.className='task';
+  let html=`<h4>${t.title||'任務 MISSION'}</h4>`;
+  if(t.sense) html+=`<div class="sense"><span class="ic">📍</span><span>${t.sense}</span></div>`;
+  if(t.intro) html+=`<p style="margin:0 0 6px;font-size:14px">${t.intro}</p>`;
+  if(t.q) html+=`<div class="q">${t.q}</div>`;
+  if(t.couplet) html+=`<div class="reveal" style="background:rgba(244,239,224,.06);border-style:solid;font-family:var(--serif);font-size:15px;letter-spacing:1px">${t.couplet.join('<br>')}</div>`;
+  if(t.seek){t.seek.forEach(s=>{html+=`<div class="field"><label>${s.who}：${s.clue}</label><input data-k="${s.key}" placeholder="他躲在哪裡？"></div>`;});}
+  if(t.inputs){
+    if(t.inputs.some(i=>i.mini)){
+      html+=`<div class="mini-inputs">`+t.inputs.map(i=>`<input data-k="${i.key}" maxlength="2" placeholder="${i.ph}">`).join('')+`</div>`;
+    }else{
+      t.inputs.forEach(i=>{html+=`<div class="field"><label>${i.label}</label><input data-k="${i.key}" placeholder="${i.ph}"></div>`;});
+    }
+  }
+  if(t.observe){html+=`<div class="field"><label>${t.observe.label}</label><input data-k="${t.observe.key}" placeholder="${t.observe.ph||''}"></div>`;}
+  // 選拍
+  if(st.photo){
+    const have=S.album[st.n];
+    html+=`<div class="photo-cap">
+      <div class="pc-head">📸 拍照加入相簿（選拍）</div>
+      <div class="pc-prompt">${st.photo.prompt}</div>
+      <img id="photoThumb${st.n}" class="photo-thumb ${have?'':'hidden'}" src="${have||''}" alt="">
+      <label class="pc-btn"><input type="file" accept="image/*" capture="environment" onchange="handlePhoto(this,${st.n})" hidden>
+        <span id="photoBtnLbl${st.n}">${have?'重拍 / 換一張':'開啟相機 · 拍一張'}</span></label>
+    </div>`;
+  }
+  html+=`<button class="btn" onclick="submitTask()">${t.submitText||'完成'}</button>`;
+  if(t.joshNote) html+=`<div class="note-josh">${t.joshNote}</div>`;
+  box.innerHTML=html;chat.appendChild(box);scrollChat();
+  // 還原已填
+  box.querySelectorAll('input[data-k]').forEach(el=>{if(S.answers[el.dataset.k])el.value=S.answers[el.dataset.k];});
+}
+
+/* ---------- 拍照：壓縮後存本機 ---------- */
+function handlePhoto(input, n){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const url=URL.createObjectURL(f); const img=new Image();
+  img.onload=()=>{
+    const max=1000; let w=img.naturalWidth,h=img.naturalHeight;
+    const sc=Math.min(1,max/Math.max(w,h)); w=Math.round(w*sc); h=Math.round(h*sc);
+    const c=document.createElement('canvas');c.width=w;c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    const data=c.toDataURL('image/jpeg',0.72);
+    S.album[n]=data; save(); renderDots();
+    URL.revokeObjectURL(url);
+    const th=document.getElementById('photoThumb'+n); if(th){th.src=data;th.classList.remove('hidden');}
+    const lb=document.getElementById('photoBtnLbl'+n); if(lb) lb.textContent='重拍 / 換一張';
+  };
+  img.onerror=()=>{alert('照片讀取失敗，換一張試試看');URL.revokeObjectURL(url);};
+  img.src=url;
+}
+
+/* ---------- 答案判定（只判「有標準答案且已確認」的題） ---------- */
+const TRIES={};
+const NORM=s=>(s||'').replace(/[\s，,。.、·・「」（）()／/　]/g,'').trim();
+function matchOne(val,accept){const v=NORM(val);if(!v)return false;
+  return accept.some(a=>{const n=NORM(a);return n&&(v===n||v.includes(n));});}
+function collectChecks(st){const out=[];const t=st.task;
+  if(t.inputs)t.inputs.forEach(i=>{if(i.accept&&i.confirmed)out.push({key:i.key,accept:i.accept,name:i.label});});
+  if(t.seek)t.seek.forEach(s=>{if(s.accept&&s.confirmed)out.push({key:s.key,accept:s.accept,name:s.who});});
+  return out;}
+
+function submitTask(){
+  const st=STAGES[S.stage-1]; const t=st.task; const chat=document.getElementById('chat');
+  const taskBoxEl=chat.querySelector('.task');
+  chat.querySelectorAll('.task input[data-k]').forEach(el=>{S.answers[el.dataset.k]=el.value.trim();});
+  if(st.n===1){ if(!S.answers.codename){alert('先幫自己取個探險代號吧！');return;} S.codename=S.answers.codename; }
+
+  // ── 判對錯：答錯不放行 ──
+  const checks=collectChecks(st);
+  if(checks.length){
+    const wrong=[];
+    checks.forEach(c=>{const el=taskBoxEl.querySelector(`[data-k="${c.key}"]`);
+      const ok=matchOne(el?el.value:'',c.accept);
+      if(el){el.classList.toggle('bad',!ok);} if(!ok)wrong.push(c);});
+    const old=taskBoxEl.querySelector('.reveal.wrong');if(old)old.remove();
+    if(wrong.length){
+      TRIES[st.n]=(TRIES[st.n]||0)+1;
+      let msg;
+      if(TRIES[st.n]>=3){
+        msg='別急，小葉偷偷告訴你：'+wrong.map(w=>`<b>${w.name}</b> 是「${w.accept[0]}」`).join('、')+'，再輸入一次吧！';
+      }else{
+        msg='嗯～好像不太對喔 🤔 再看看線索、或到現場找找答案，答對才能過關！';
+      }
+      taskBoxEl.insertAdjacentHTML('beforeend',`<div class="reveal wrong">❌ ${msg}</div>`);
+      scrollChat(); return; // 不上鎖、不前進
+    }
+  }
+
+  save();
+  const taskBox=taskBoxEl;
+  const bad=taskBox.querySelector('.reveal.wrong');if(bad)bad.remove();
+  if(checks.length){taskBox.insertAdjacentHTML('beforeend',`<div class="reveal right">✅ 答對了！小葉幫你按個讚 👍</div>`);}
+  taskBox.querySelectorAll('input').forEach(i=>i.disabled=true);
+  taskBox.querySelector('.btn').classList.add('hidden');
+  const jn=taskBox.querySelector('.note-josh'); if(jn) jn.remove();
+  const pcBtn=taskBox.querySelector('.pc-btn'); if(pcBtn) pcBtn.style.display='none';
+
+  if(t.reveal){taskBox.insertAdjacentHTML('beforeend',`<div class="reveal">💡 ${t.reveal}</div>`);}
+  if(t.seek){const rows=t.seek.map(s=>`<div>・<b>${s.who}</b> → <span class="ok">${s.ans}</span></div>`).join('');
+    taskBox.insertAdjacentHTML('beforeend',`<div class="reveal">💡 參考解答：${rows}</div>`);}
+
+  if(!S.stamps.includes(st.n))S.stamps.push(st.n);
+  save(); renderDots();
+
+  if(st.final){
+    S.done=true;save();
+    const cont=document.createElement('div');cont.style.padding='16px 0 0';
+    cont.innerHTML=`<button class="btn brick" onclick="go('finale')">領取榮譽 + 平溪明信片 🏅</button>`;
+    chat.appendChild(cont);
+  }else{
+    const nh=document.createElement('div');nh.className='next-hint';
+    nh.innerHTML=`<div class="k">🔎 下一站線索</div><div class="v">「${st.hint}」</div>`;
+    chat.appendChild(nh);
+    const cont=document.createElement('div');cont.style.padding='4px 0 0';
+    cont.innerHTML=`<button class="btn" onclick="nextStage()">前往第 ${st.n+1} 關 →</button>`;
+    chat.appendChild(cont);
+  }
+  scrollChat(true);
+}
+function nextStage(){S.stage++;save();renderStage();}
+function advance(){ if(PLAY_QUEUE.length){const f=PLAY_QUEUE.shift();f();} }
+function scrollChat(){requestAnimationFrame(()=>{window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});});}
+
+/* ---------- 相簿 ---------- */
+function openBag(){
+  const g=document.getElementById('bagGrid');
+  g.innerHTML=STAGES.map(s=>{
+    const p=S.album[s.n]; const label=(s.photo&&s.photo.label)||s.place;
+    return `<div class="album-cell">${p?`<img src="${p}" alt="">`:`<div class="empty">尚未拍照</div>`}<div class="tag">${s.n}. ${label}</div></div>`;
+  }).join('');
+  document.getElementById('bag').classList.add('on');
+}
+function closeBag(){document.getElementById('bag').classList.remove('on');}
+
+/* ---------- 榮譽狀 ---------- */
+function renderCert(){
+  document.getElementById('certName').textContent=S.codename||'平溪小旅人';
+  document.getElementById('certStamps').innerHTML=STAGES.map(s=>S.stamps.includes(s.n)?'🟢':'⚪').join(' ');
+}
+
+/* ---------- 明信片自動拼貼（Canvas） ---------- */
+function loadImg(src){return new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=src;});}
+function drawCover(ctx,img,x,y,w,h){
+  const ir=img.width/img.height, r=w/h; let sw,sh,sx,sy;
+  if(ir>r){sh=img.height;sw=sh*r;sx=(img.width-sw)/2;sy=0;}
+  else{sw=img.width;sh=sw/r;sx=0;sy=(img.height-sh)/2;}
+  ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h);
+}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();
+  if(ctx.roundRect){ctx.roundRect(x,y,w,h,r);}else{
+    ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+}
+async function buildPostcard(){
+  const c=document.getElementById('postcard'); const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  // 背景
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2f4a3d');g.addColorStop(1,'#16241c');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#faf6ea';roundRect(ctx,40,40,W-80,H-80,36);ctx.fill();
+  // 標題
+  ctx.textAlign='center';ctx.fillStyle='#2f4a3d';
+  ctx.font='700 74px "Songti TC","Noto Serif TC",serif';
+  ctx.fillText('回到平溪那年',W/2,150);
+  ctx.font='600 22px system-ui';ctx.fillStyle='#8a7a55';
+  ctx.fillText('PINGXI OLD STREET · AI TIME MACHINE',W/2,190);
+  // 照片格：2 欄 × 3 列 + 底部一張寬圖（共 7）
+  const cells=[];const gap=26,mx=80,top=230;
+  const cw=(W-mx*2-gap)/2, ch=cw*0.72;
+  for(let i=0;i<6;i++){const col=i%2,row=(i/2|0);
+    cells.push({x:mx+col*(cw+gap),y:top+row*(ch+gap),w:cw,h:ch,n:i+1});}
+  const wideY=top+3*(ch+gap); const wideH=cw*0.62;
+  cells.push({x:mx,y:wideY,w:W-mx*2,h:wideH,n:7});
+  for(const cell of cells){
+    ctx.save();roundRect(ctx,cell.x,cell.y,cell.w,cell.h,18);ctx.clip();
+    const data=S.album[cell.n];
+    if(data){const im=await loadImg(data); if(im){drawCover(ctx,im,cell.x,cell.y,cell.w,cell.h);}else{fillEmpty(ctx,cell);} }
+    else{fillEmpty(ctx,cell);}
+    ctx.restore();
+    ctx.strokeStyle='#e6dcc2';ctx.lineWidth=3;roundRect(ctx,cell.x,cell.y,cell.w,cell.h,18);ctx.stroke();
+    // 角標
+    const lb=(STAGES[cell.n-1].photo&&STAGES[cell.n-1].photo.label)||STAGES[cell.n-1].place;
+    ctx.fillStyle='rgba(20,31,25,.72)';roundRect(ctx,cell.x+10,cell.y+cell.h-40,ctx.measureText(lb).width*0+ (lb.length*22)+24,30,15);ctx.fill();
+    ctx.fillStyle='#ffcf3f';ctx.textAlign='left';ctx.font='600 20px system-ui';
+    ctx.fillText(cell.n+'. '+lb,cell.x+22,cell.y+cell.h-19);
+    ctx.textAlign='center';
+  }
+  // 底部落款
+  const footY=wideY+wideH+64;
+  ctx.fillStyle='#2f4a3d';ctx.font='700 34px "Songti TC",serif';
+  ctx.fillText('探險家　'+(S.codename||'平溪小旅人'),W/2,footY);
+  ctx.fillStyle='#8a7a55';ctx.font='500 22px system-ui';
+  const d=new Date();const ds=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+  ctx.fillText('平溪榮譽探險家　·　'+ds,W/2,footY+38);
+}
+function fillEmpty(ctx,cell){
+  const g=ctx.createLinearGradient(cell.x,cell.y,cell.x,cell.y+cell.h);
+  g.addColorStop(0,'#3f6151');g.addColorStop(1,'#1d3128');ctx.fillStyle=g;
+  ctx.fillRect(cell.x,cell.y,cell.w,cell.h);
+  ctx.fillStyle='rgba(244,239,224,.5)';ctx.textAlign='center';ctx.font='500 22px system-ui';
+  ctx.fillText('（未拍照）',cell.x+cell.w/2,cell.y+cell.h/2+8);
+}
+function downloadPostcard(){
+  const c=document.getElementById('postcard');
+  try{
+    const a=document.createElement('a');
+    a.download='平溪明信片_'+(S.codename||'探險家')+'.jpg';
+    a.href=c.toDataURL('image/jpeg',0.92);a.click();
+  }catch(e){alert('儲存失敗，請改用長按圖片另存');}
+}
+
+function restart(){ if(confirm('確定要清除進度、重新開始嗎？')){S=fresh();save();location.reload();} }
+
+/* ---------- 啟動 ---------- */
+(function init(){
+  const ci=document.getElementById('coverImg');ci.src=SCENE_IMG[1];
+  ci.onerror=()=>{ci.style.display='none';document.querySelector('.cover-hero').style.background='linear-gradient(160deg,#3f6151,#1d3128)';};
+  if(S.done){document.querySelector('#cover .cover-body p').innerHTML='你已完成旅程！可回顧榮譽狀與平溪明信片，或重新開始。';
+    document.querySelector('#cover .cta').textContent='查看榮譽 + 明信片 🏅';
+    document.querySelector('#cover .cta').setAttribute('onclick',"go('finale')");}
+  else if(S.stage>1){document.querySelector('#cover .cta').textContent='繼續冒險（第 '+S.stage+' 關）→';}
+})();
+</script>
+</body>
+</html>

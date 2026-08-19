@@ -1,0 +1,18 @@
+# 測試截圖與編輯暫存
+shot-*.png
+~$*
+*.xlsx
+build_script_xlsx.py
+.playwright-mcp/
+.DS_Store
+
+# slides/generated：只保留遊戲實際使用的 8 張圖，其餘草稿不上傳
+slides/generated/*
+!slides/generated/xiaoye-avatar3_20260817_205712.png
+!slides/generated/scene1-station-v4_20260817_205840.png
+!slides/generated/scene2b-store_20260817_210151.png
+!slides/generated/scene3b-dept_20260817_210243.png
+!slides/generated/scene4b-temple_20260817_210345.png
+!slides/generated/scene5b-seek_20260817_210449.png
+!slides/generated/scene6b-fabric_20260817_210543.png
+!slides/generated/scene7b-taro_20260817_210639.png
