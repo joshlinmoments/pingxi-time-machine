@@ -16,3 +16,11 @@ slides/generated/*
 !slides/generated/scene5b-seek_20260817_210449.png
 !slides/generated/scene6b-fabric_20260817_210543.png
 !slides/generated/scene7b-taro_20260817_210639.png
+
+# 立牌/建置腳本與預覽（非遊戲檔）
+*.jsx
+*.py
+*.ai
+*_preview.png
+v3-*.png
+cutout*.py
