@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<title>回到平溪那年 · 平溪老街走讀遊戲</title>
+<title>平溪囝仔時光機 · PINGXI TIME MACHINE</title>
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
@@ -11,7 +11,7 @@
 <meta name="theme-color" content="#1d3128">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="回到平溪那年">
+<meta name="apple-mobile-web-app-title" content="平溪囝仔時光機">
 <meta name="mobile-web-app-capable" content="yes">
 <style>
 /* ============ Design tokens：墨綠品牌 × 現代高對比 ============ */
@@ -160,6 +160,10 @@ textarea{font-family:inherit}
 .next-hint{background:var(--pine-deep);border-radius:14px;padding:14px 15px;margin:10px 0 4px;border:1px solid var(--line)}
 .next-hint .k{font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:5px}
 .next-hint .v{font-size:15px;color:var(--cream);font-family:var(--serif)}
+.next-hint .map-link{display:block;margin-top:10px;text-align:center;text-decoration:none;
+  background:rgba(255,207,63,.14);border:1px solid rgba(255,207,63,.5);color:var(--gold);
+  border-radius:10px;padding:10px;font-size:14px;font-weight:700}
+.next-hint .map-link:active{background:rgba(255,207,63,.24)}
 .pad{padding:12px 16px calc(20px + env(safe-area-inset-bottom,0))}
 .hidden{display:none!important}
 
@@ -178,6 +182,8 @@ textarea{font-family:inherit}
 .bp-item{display:flex;gap:10px;align-items:center;background:rgba(244,239,224,.06);border:1px solid var(--line);
   border-radius:12px;padding:10px 12px}
 .bp-item .emo{font-size:26px;flex:0 0 auto}
+.bp-item img.emo{width:42px;height:42px;object-fit:contain}
+.sys.loot .loot-img{height:78px;object-fit:contain;margin-bottom:4px}
 .bp-item .nm{font-size:14px;font-weight:700;color:var(--cream)}
 .bp-item .st{font-size:11px;color:var(--gold)}
 .bp-item.used{opacity:.55}.bp-item.used .st{color:rgba(244,239,224,.5)}
@@ -222,13 +228,38 @@ textarea{font-family:inherit}
 .postcard-wrap h3{font-family:var(--serif);font-size:18px;margin:0 0 4px}
 .postcard-wrap .sub{font-size:12px;color:rgba(244,239,224,.6);margin-bottom:12px}
 #postcard{width:100%;border-radius:14px;box-shadow:var(--shadow);background:var(--pine-deep)}
+
+/* 貼紙編輯器 */
+#editor{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;background:rgba(10,16,12,.95);
+  padding:calc(14px + env(safe-area-inset-top,0)) 14px calc(16px + env(safe-area-inset-bottom,0));max-width:480px;margin:0 auto}
+#editor.on{display:flex}
+.ed-top{text-align:center;margin-bottom:10px}
+.ed-title{font-family:var(--serif);font-size:20px;color:var(--cream)}
+.ed-hint{font-size:11px;color:rgba(244,239,224,.6);margin-top:3px}
+.ed-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+.ed-frame{position:relative;width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;
+  border:3px solid var(--gold);background:#000;touch-action:none}
+#edPhoto{width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none}
+.ed-sticker{position:absolute;touch-action:none;cursor:move}
+.ed-sticker img{width:100%;height:100%;pointer-events:none;user-select:none;-webkit-user-drag:none;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.45))}
+.ed-sticker .del{position:absolute;top:-11px;left:-11px;width:24px;height:24px;border-radius:50%;background:var(--brick);
+  color:#fff;font-size:13px;display:grid;place-items:center;border:2px solid #fff}
+.ed-sticker .rz{position:absolute;right:-11px;bottom:-11px;width:24px;height:24px;border-radius:50%;background:var(--gold);
+  color:var(--pine-deep);font-size:12px;display:grid;place-items:center;border:2px solid #fff;touch-action:none}
+.ed-tray{display:flex;gap:8px;overflow-x:auto;padding:12px 2px;margin-top:6px}
+.ed-tray button{flex:0 0 auto;width:66px;height:66px;border-radius:12px;background:rgba(244,239,224,.1);
+  border:1px solid rgba(244,239,224,.25);display:grid;place-items:center;padding:7px}
+.ed-tray button img{max-width:100%;max-height:100%;object-fit:contain}
+.ed-actions{display:flex;gap:10px}
+.ed-actions .btn{margin-top:0}
 </style>
 </head>
 <body>
 <div id="app">
 
   <div id="topbar" class="hidden">
-    <div class="brand-mini">回到平溪那年<small>BACK TO PINGXI</small></div>
+    <div class="brand-mini">平溪囝仔時光機<small>PINGXI TIME MACHINE</small></div>
     <div class="dots" id="dots"></div>
     <button class="bag-btn" onclick="openBag()">🎒<span class="n hidden" id="bagN">0</span></button>
   </div>
@@ -238,8 +269,8 @@ textarea{font-family:inherit}
     <div class="cover-hero">
       <img id="coverImg" alt="回到平溪那年">
       <div class="cover-title">
-        <div class="zh">回到<b>平溪</b>那年</div>
-        <div class="en">PINGXI OLD STREET · AI 時光機</div>
+        <div class="zh">平溪<b>囝仔</b>時光機</div>
+        <div class="en">PINGXI TIME MACHINE</div>
       </div>
     </div>
     <div class="cover-body">
@@ -302,6 +333,20 @@ textarea{font-family:inherit}
     </div>
   </div>
 
+  <!-- 貼紙編輯器 -->
+  <div id="editor">
+    <div class="ed-top">
+      <div class="ed-title">貼貼紙裝飾 🎨</div>
+      <div class="ed-hint">點下方貼紙加入 · 拖曳移動 · 右下角 ⤡ 縮放 · ✕ 刪除</div>
+    </div>
+    <div class="ed-canvas-wrap"><div class="ed-frame" id="edFrame"><img id="edPhoto" src="" alt=""></div></div>
+    <div class="ed-tray" id="edTray"></div>
+    <div class="ed-actions">
+      <button class="btn ghost sm" onclick="editorCancel()">用原圖</button>
+      <button class="btn sm" onclick="editorDone()">完成 ✓</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -325,6 +370,14 @@ const SCENE_IMG={
   7:"slides/generated/scene7b-taro_20260817_210639.png",
 };
 
+/* ---------- 道具圖片 ---------- */
+const ITEM_IMG={
+  "鞭炮":"slides/stickers/item-firecracker.png",
+  "萬金油":"slides/stickers/item-tigerbalm.png",
+  "地瓜":"slides/stickers/item-sweetpotato.png",
+  "新衣":"slides/stickers/item-newclothes.png",
+};
+
 /* ---------- 圖鑑主檔 ---------- */
 const DEX={
   "小葉":{name:"小葉",img:XIAOYE,desc:"平溪最強嚮導，愛吹牛、超有人情味。"},
@@ -332,28 +385,43 @@ const DEX={
   "阿任":{name:"阿任",emo:"👦",desc:"皮蛋一枚，躲在相通的防空洞裡打鞭炮大戰。"},
   "大乾媽":{name:"大乾媽",emo:"🙏",desc:"觀音媽，全平溪人的大乾媽，聚落的起點。"},
   "美雲阿姨":{name:"美雲阿姨",emo:"🧵",desc:"美雲布藝的老闆，過年新衣都靠她。"},
-  "鞭炮":{name:"鞭炮",emo:"🧨",desc:"成盈利拿到，後山用來炸出躲藏的阿任。"},
-  "萬金油":{name:"萬金油",emo:"💨",desc:"新建成拿到，鞭炮大戰後互相療傷。"},
-  "地瓜":{name:"地瓜",emo:"🍠",desc:"平安鐘烘窯烤出來的，香噴噴（來源成謎）。"},
-  "新衣":{name:"新衣",emo:"👕",desc:"美雲阿姨做的新衣，過年的儀式感。"},
+  "鞭炮":{name:"鞭炮",img:ITEM_IMG["鞭炮"],desc:"成盈利拿到，後山用來炸出躲藏的阿任。"},
+  "萬金油":{name:"萬金油",img:ITEM_IMG["萬金油"],desc:"新建成拿到，鞭炮大戰後互相療傷。"},
+  "地瓜":{name:"地瓜",img:ITEM_IMG["地瓜"],desc:"平安鐘烘窯烤出來的，香噴噴（來源成謎）。"},
+  "新衣":{name:"新衣",img:ITEM_IMG["新衣"],desc:"美雲阿姨做的新衣，過年的儀式感。"},
 };
 
-/* ---------- 趣味相框 ---------- */
-const FRAMES={
-  diexian:{label:"八仙洞・玩碟仙", sticker:"🔮", tint:"rgba(120,80,200,.30)", band:"#4b2e83"},
-  firecracker:{label:"防空洞・鞭炮大戰", sticker:"🧨", tint:"rgba(220,80,40,.30)", band:"#a83218"},
-  sweetpotato:{label:"平安鐘・烤地瓜", sticker:"🍠", tint:"rgba(230,150,40,.28)", band:"#b5651d"},
-  group:{label:"回到平溪那年", sticker:"📸", tint:"rgba(255,207,63,.22)", band:"#2f4a3d"},
+/* ---------- 貼紙（拍照後可自由擺放） ---------- */
+const XIAOYE_STICKER="slides/stickers/xiaoye-chibi.png";
+const STICKERS={
+  planchette:{img:"slides/stickers/st-planchette.png", name:"碟仙"},
+  explosion:{img:"slides/stickers/st-explosion.png", name:"爆炸"},
+  firecracker:{img:"slides/stickers/item-firecracker.png", name:"鞭炮"},
+  flames:{img:"slides/stickers/st-flames.png", name:"火焰"},
+  sweetpotato:{img:"slides/stickers/item-sweetpotato.png", name:"烤地瓜"},
+  tarobowl:{img:"slides/stickers/st-tarobowl.png", name:"芋圓"},
+  fireworks:{img:"slides/stickers/st-fireworks.png", name:"煙火"},
+  xiaoye:{img:XIAOYE_STICKER, name:"小葉"},
 };
+/* 每個拍照點提供的貼紙（呼應動作） */
+const STICKER_SETS={
+  "5a":["planchette","fireworks","xiaoye"],
+  "5b":["explosion","firecracker","xiaoye"],
+  "5c":["sweetpotato","flames","xiaoye"],
+  "7":["xiaoye","tarobowl","fireworks"],
+  "_default":["xiaoye","fireworks"],
+};
+function stickersFor(slot){return STICKER_SETS[slot]||STICKER_SETS._default;}
 
 /* ---------- 關卡（逐段 beats） ---------- */
 const STAGES=[
- {n:1, zh:"啟程・平溪車站", en:"Departure · Pingxi Station", place:"平溪火車站",
+ {n:1, zh:"啟程・平溪車站", en:"Departure · Pingxi Station", place:"平溪火車站", map:"平溪火車站",
   story:"鐵道山城、天燈故鄉，旅程從這座月台開始。",
   hint:"牆上開滿花的那家「24 小時柑仔店」，就在地圖 2 號！",
   beats:[
     {t:"ye", x:"哈囉！我是小葉，平溪土生土長、認證的最強嚮導！這條老街的每塊石頭、每間店，我閉著眼睛都認得。"},
     {t:"ye", x:"平溪啊，是鐵道穿過老街的山城，也是天燈的故鄉——別急，好戲在後頭，跟我走就對了！"},
+    {t:"ye", x:"先教你三招 👉 ① 一路上會收集『平溪囝仔圖鑑』和道具；② 看到喜歡的畫面就盡量拍、別客氣——我會幫你變成專屬的『小小遊記』；③ 想隨時翻圖鑑、相簿、道具，點右上角的 🎒 就好！"},
     {t:"scene"},
     {t:"input", key:"codename", label:"先報上名來！這趟平溪冒險，你想要我怎麼稱呼你？", ph:"例如：時光小旅人",
       warm:"太好了，{name}！這名字我喜歡，走跳平溪就靠你了！"},
@@ -365,12 +433,12 @@ const STAGES=[
     {t:"ye", x:"走吧！先帶你去我最常光顧的那間——牆上開滿花的「24 小時柑仔店」！"},
   ]},
 
- {n:2, zh:"24 小時柑仔店", en:"The 24hr Store · 成盈利商店", place:"成盈利商店",
+ {n:2, zh:"24 小時柑仔店", en:"The 24hr Store · 成盈利商店", place:"成盈利商店", map:"平溪 成盈利商店",
   story:"敲敲門就開門的柑仔店，是老平溪的 24 小時溫暖。",
   hint:"平溪人的百貨天堂「新建成百貨行」，地圖 3 號！",
   beats:[
     {t:"input", key:"store2", label:"到囉！看看招牌，把這家店的名字打給我（三個字）。", ph:"店名",
-      accept:["成盈利"], confirmed:true, tip:"招牌上金金亮亮那三個字", warm:"沒錯，就是「成盈利」！我從小喝到大的地方 😎"},
+      accept:["成盈利"], confirmed:true, tip:"招牌上金金亮亮那三個字", warm:"沒錯，就是「成盈利」！這間柑仔店，我從小逛到大，超有感情 😎"},
     {t:"ye", x:"你別看它小，以前庄裡的人半夜嘴饞、缺瓶醬油，敲敲門阿伯就開門——所以我們都笑說它是「平溪的 24 小時便利商店」！"},
     {t:"scene"},
     {t:"open", key:"j2", prompt:"問問老闆、或自己想想看：一家柑仔店能開上幾十年，靠的是什麼？把你聽到或想到的寫下來。",
@@ -382,7 +450,7 @@ const STAGES=[
     {t:"stamp"},
   ]},
 
- {n:3, zh:"平溪的百貨公司", en:"Department Store · 新建成百貨行", place:"新建成百貨行",
+ {n:3, zh:"平溪的百貨公司", en:"Department Store · 新建成百貨行", place:"新建成百貨行", map:"平溪 新建成百貨行",
   story:"山城裡什麼都有的百貨行，是平溪人的小天堂。",
   hint:"有觀音、有香火的「觀音巖」，地圖 4 號那棟金碧輝煌建築的 2 樓！",
   beats:[
@@ -396,7 +464,7 @@ const STAGES=[
     {t:"stamp"},
   ]},
 
- {n:4, zh:"乾媽的家", en:"Godmother's Home · 觀音巖", place:"觀音巖",
+ {n:4, zh:"乾媽的家", en:"Godmother's Home · 觀音巖", place:"觀音巖", map:"平溪 觀音巖",
   story:"觀音媽是全平溪人的大乾媽，護佑著每個囝仔。",
   hint:"跟我上後山，玩我們囝仔時候最愛的躲貓貓！",
   beats:[
@@ -413,29 +481,29 @@ const STAGES=[
     {t:"stamp"},
   ]},
 
- {n:5, zh:"後山躲貓貓", en:"Hide & Seek · 平安鐘", place:"觀音巖後山・平安鐘",
+ {n:5, zh:"後山躲貓貓", en:"Hide & Seek · 平安鐘", place:"觀音巖後山・平安鐘", map:"平溪 觀音巖 平安鐘",
   story:"八仙洞、防空洞、平安鐘——後山藏著小葉最瘋的童年。",
   hint:"太陽下山啦！去找美雲阿姨做件新衣——門牌 40 號，地圖 6 號！",
   beats:[
     {t:"ye", x:"這座山，就是我們囝仔時候玩躲貓貓的秘密基地！來，跟我走一圈，聽我講我跟芸芸、阿任的故事——一邊還要拍幾張穿越照，讓你親自跳進我們的童年！"},
     {t:"scene"},
     {t:"ye", x:"先說芸芸。她最愛躲在廟旁邊的「八仙洞」——那其實是日據時期的防空洞，超有歷史！我們小時候最愛蹲在洞裡玩碟仙，嚇得半死又愛玩，哈哈！"},
-    {t:"photo", slot:"5a", label:"八仙洞・玩碟仙", frame:"diexian", prompt:"到八仙洞，用趣味相框拍一張「你在洞裡玩碟仙」的穿越畫面！"},
+    {t:"photo", slot:"5a", label:"八仙洞・玩碟仙", prompt:"到八仙洞，用趣味相框拍一張「你在洞裡玩碟仙」的穿越畫面！"},
     {t:"dex", who:"芸芸"},
     {t:"ye", x:"接著是阿任，那皮蛋最愛躲在「一連好幾個相通的防空洞」裡。你知道嗎？逢年過節，石底村和平溪村的囝仔，就在這裡打一場『鞭炮大戰』！"},
     {t:"use", need:"鞭炮", label:"朝防空洞丟鞭炮 🧨", x:"碰——！💥 一陣煙霧，阿任灰頭土臉、哈哈大笑地舉手投降跑出來！"},
-    {t:"photo", slot:"5b", label:"防空洞・鞭炮大戰", frame:"firecracker", prompt:"用趣味相框，拍一張「你在防空洞丟鞭炮」的痛快畫面！"},
+    {t:"photo", slot:"5b", label:"防空洞・鞭炮大戰", prompt:"用趣味相框，拍一張「你在防空洞丟鞭炮」的痛快畫面！"},
     {t:"dex", who:"阿任"},
     {t:"use", need:"萬金油", label:"拿出萬金油互相擦一擦 💨", x:"一陣激戰下來，大家東痛西痛。抹上萬金油，呼～舒服多了！這味道，就是平溪的童年味 😌"},
     {t:"ye", x:"打完鬧完，長輩在山下一聲吆喝，我們就乖乖跑去乾媽面前領壓歲錢，握握手、拱拱手，新年快樂！——欸，那我躲哪？我躲在山頂『平安鐘』啦！"},
     {t:"ye", x:"平安鐘在山頂，聽得見鐘聲，是全平溪最高、最靜的地方——也是以前我們烘窯烤地瓜的秘密基地！"},
-    {t:"photo", slot:"5c", label:"平安鐘・烤地瓜", frame:"sweetpotato", prompt:"用趣味相框，拍一張「你在平安鐘烤地瓜」的畫面！"},
+    {t:"photo", slot:"5c", label:"平安鐘・烤地瓜", prompt:"用趣味相框，拍一張「你在平安鐘烤地瓜」的畫面！"},
     {t:"get", item:"地瓜", x:"烤好啦！小葉遞給你一顆「香噴噴的現烤地瓜」🍠！（至於地瓜哪來的…嘿嘿，這就不好說了！）"},
     {t:"dex", who:"地瓜"},
     {t:"stamp"},
   ]},
 
- {n:6, zh:"做新衫", en:"New Year Clothes · 美雲布藝", place:"美雲布藝工作室",
+ {n:6, zh:"做新衫", en:"New Year Clothes · 美雲布藝", place:"美雲布藝工作室", map:"平溪老街 美雲布藝工作室",
   story:"過年做新衣，是老平溪最鄭重的儀式感。",
   hint:"最後一站！平溪芋圓，地圖 7 號——小葉請客！",
   beats:[
@@ -453,14 +521,14 @@ const STAGES=[
     {t:"ye", x:"恭喜你！大部分關卡都破了！最後一站走到 7 號平溪芋圓——讓我小葉本人，請你吃一碗道地芋圓，順便講講我那段荒誕不羈的平溪童年 😎"},
   ]},
 
- {n:7, zh:"小葉請客吃芋圓", en:"Finale · Pingxi Taro Balls", place:"平溪芋圓",
+ {n:7, zh:"小葉請客吃芋圓", en:"Finale · Pingxi Taro Balls", place:"平溪芋圓", map:"平溪芋圓",
   story:"一碗芋圓，甜甜地收束這趟回到平溪的旅程。",
   final:true,
   beats:[
     {t:"ye", x:"呼～這一圈走下來，你已經不只是遊客，是我認證的「平溪囝仔」了！從火車站、柑仔店、百貨行、乾媽家，到後山那場鞭炮大戰…謝謝你陪我回到平溪的那些年。"},
     {t:"scene"},
     {t:"ye", x:"來清點你的收穫——🧨鞭炮、💨萬金油、🍠地瓜、👕新衣，還有你收服的「平溪囝仔圖鑑」：小葉、芸芸、阿任、大乾媽，全員到齊！（點右上角 🎒 隨時看）"},
-    {t:"photo", slot:"7", label:"回到平溪那年・合照", frame:"group", prompt:"用專屬合照框，跟我、芸芸、阿任合照一張吧！📸"},
+    {t:"photo", slot:"7", label:"回到平溪那年・合照", prompt:"用專屬合照框，跟我、芸芸、阿任合照一張吧！📸"},
     {t:"open", key:"j7", prompt:"旅程的最後，寫一句話送給這趟「回到平溪那年」，也送給小葉吧。",
       warm:"收到！這會是你遊記最美的結尾 💌"},
     {t:"stamp"},
@@ -543,7 +611,7 @@ function playBeat(st,i,chat){
     case 'scene': showScene(st,chat); showAdvance(cont); break;
     case 'get':
       S.items[b.item]='have'; save();
-      appendSys(chat,`🎒 獲得道具　<b>${b.item}</b>`,true);
+      appendSys(chat,`<img class="loot-img" src="${ITEM_IMG[b.item]||''}" alt="" onerror="this.style.display='none'"><div>獲得道具　<b>${b.item}</b></div>`,true);
       if(b.x) appendNarr(chat,b.x);
       renderDots(); showAdvance(cont); break;
     case 'dex':
@@ -659,9 +727,9 @@ function renderUse(b,st,chat,cont){
 /* ---- 互動：拍照 / 趣味相框 ---- */
 function renderPhoto(b,st,chat,cont){
   const have=S.album[b.slot];
-  const box=document.createElement('div');box.className='photo-cap'+(b.frame?' frame':'');
+  const box=document.createElement('div');box.className='photo-cap frame';
   box.innerHTML=`
-    <div class="pc-head">${b.frame?'🖼️ 趣味相框穿越照':'📸 拍照加入相簿'}（選拍）</div>
+    <div class="pc-head">📸 拍照＋貼貼紙（選拍，別客氣多拍幾張！）</div>
     <div class="pc-prompt">${b.prompt}</div>
     <img class="photo-thumb ${have?'':'hidden'}" src="${have?have.data:''}" alt="">
     <label class="pc-btn"><input type="file" accept="image/*" capture="environment" hidden>
@@ -671,53 +739,117 @@ function renderPhoto(b,st,chat,cont){
   const fileInput=box.querySelector('input[type=file]');
   const thumb=box.querySelector('.photo-thumb');
   const lbl=box.querySelector('.lbl');
-  fileInput.onchange=()=>handlePhoto(fileInput,b,st,thumb,lbl);
-  box.querySelector('.btn').onclick=()=>{
+  const goBtn=box.querySelector('.btn');
+  fileInput.onchange=()=>handlePhoto(fileInput,b,st,thumb,lbl,goBtn);
+  goBtn.onclick=()=>{
     box.querySelector('.pc-btn').style.display='none';
-    box.querySelector('.btn').classList.add('hidden');
+    goBtn.classList.add('hidden');
     cont();
   };
   scrollChat();
 }
-function handlePhoto(input,b,st,thumb,lbl){
+function handlePhoto(input,b,st,thumb,lbl,goBtn){
   const f=input.files&&input.files[0]; if(!f) return;
   const url=URL.createObjectURL(f); const img=new Image();
   img.onload=()=>{
-    let data;
-    if(b.frame){ data=compositeFrame(img,FRAMES[b.frame]); }
-    else{
-      const max=1100; let w=img.naturalWidth,h=img.naturalHeight;
-      const sc=Math.min(1,max/Math.max(w,h)); w=Math.round(w*sc); h=Math.round(h*sc);
-      const c=document.createElement('canvas');c.width=w;c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h); data=c.toDataURL('image/jpeg',0.72);
-    }
-    S.album[b.slot]={data,label:b.label,stage:st.n,frame:b.frame||null}; save(); renderDots();
+    const max=1200; let w=img.naturalWidth,h=img.naturalHeight;
+    const sc=Math.min(1,max/Math.max(w,h)); w=Math.round(w*sc); h=Math.round(h*sc);
+    const c=document.createElement('canvas');c.width=w;c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    const base=c.toDataURL('image/jpeg',0.82);
     URL.revokeObjectURL(url);
-    if(thumb){thumb.src=data;thumb.classList.remove('hidden');}
-    if(lbl)lbl.textContent='重拍 / 換一張';
-    const btn=thumb&&thumb.parentElement.querySelector('.btn'); if(btn)btn.textContent='繼續 →';
+    openEditor(base, b.slot, b.label, (finalData)=>{
+      S.album[b.slot]={data:finalData,label:b.label,stage:st.n}; save(); renderDots();
+      if(thumb){thumb.src=finalData;thumb.classList.remove('hidden');}
+      if(lbl)lbl.textContent='重拍 / 換一張';
+      if(goBtn)goBtn.textContent='繼續 →';
+    });
   };
   img.onerror=()=>{alert('照片讀取失敗，換一張試試看');URL.revokeObjectURL(url);};
   img.src=url;
 }
-/* 趣味相框合成 */
-function compositeFrame(img,fr){
-  const W=1000,H=750; const c=document.createElement('canvas');c.width=W;c.height=H;
-  const ctx=c.getContext('2d');
-  drawCover(ctx,img,0,0,W,H);
-  ctx.fillStyle=fr.tint;ctx.fillRect(0,0,W,H);            // 色調
-  ctx.strokeStyle='#ffcf3f';ctx.lineWidth=16;ctx.strokeRect(8,8,W-16,H-16); // 金框
-  // 貼紙
-  ctx.font='150px "Apple Color Emoji","Noto Color Emoji",serif';ctx.textBaseline='top';
-  ctx.fillText(fr.sticker,30,26);
-  // 底部標題帶
-  const bh=88; ctx.fillStyle=fr.band; ctx.fillRect(0,H-bh,W,bh);
-  ctx.fillStyle='#ffcf3f';ctx.font='700 40px '+RFONT;
-  ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(fr.label,36,H-bh/2);
-  ctx.textAlign='right';ctx.fillStyle='rgba(244,239,224,.9)';ctx.font='600 24px system-ui';
-  ctx.fillText('回到平溪那年',W-36,H-bh/2);
+
+/* ---------- 貼紙編輯器 ---------- */
+let EDITOR=null;
+function openEditor(base, slot, label, onDone){
+  EDITOR={slot,label,onDone,base,stickers:[]};
+  const frame=document.getElementById('edFrame');
+  [...frame.querySelectorAll('.ed-sticker')].forEach(e=>e.remove());
+  document.getElementById('edPhoto').src=base;
+  const tray=document.getElementById('edTray');
+  tray.innerHTML=stickersFor(slot).map(id=>{const s=STICKERS[id];
+    return `<button data-id="${id}" title="${s.name}"><img src="${s.img}" alt="${s.name}" onerror="this.parentElement.style.display='none'"></button>`;}).join('');
+  tray.querySelectorAll('button').forEach(btn=>btn.onclick=()=>addSticker(btn.dataset.id));
+  document.getElementById('editor').classList.add('on');
+}
+function addSticker(id){
+  const frame=document.getElementById('edFrame');const s=STICKERS[id];if(!s)return;
+  const el=document.createElement('div');el.className='ed-sticker';
+  el.dataset.id=id;el.dataset.cx='0.5';el.dataset.cy='0.5';el.dataset.scale='0.32';
+  el.innerHTML=`<img src="${s.img}" alt=""><div class="del">✕</div><div class="rz">⤡</div>`;
+  frame.appendChild(el);
+  const img=el.querySelector('img');
+  if(img.complete)layoutSticker(el); else img.addEventListener('load',()=>layoutSticker(el));
+  attachStickerDrag(el);
+  EDITOR.stickers.push(el);
+}
+function layoutSticker(el){
+  const frame=document.getElementById('edFrame');const fw=frame.clientWidth,fh=frame.clientHeight;
+  const img=el.querySelector('img');
+  const w=parseFloat(el.dataset.scale)*fw;
+  const nat=(img.naturalWidth&&img.naturalHeight)?img.naturalHeight/img.naturalWidth:1;
+  const h=w*nat;
+  el.style.width=w+'px';el.style.height=h+'px';
+  el.style.left=(parseFloat(el.dataset.cx)*fw - w/2)+'px';
+  el.style.top=(parseFloat(el.dataset.cy)*fh - h/2)+'px';
+}
+function attachStickerDrag(el){
+  const frame=document.getElementById('edFrame');
+  el.addEventListener('pointerdown',e=>{
+    if(e.target.classList.contains('del')||e.target.classList.contains('rz'))return;
+    e.preventDefault();frame.appendChild(el);
+    const r=frame.getBoundingClientRect();const sx=e.clientX,sy=e.clientY;
+    const cx0=parseFloat(el.dataset.cx),cy0=parseFloat(el.dataset.cy);
+    const move=ev=>{const dx=(ev.clientX-sx)/r.width,dy=(ev.clientY-sy)/r.height;
+      el.dataset.cx=Math.min(1,Math.max(0,cx0+dx));el.dataset.cy=Math.min(1,Math.max(0,cy0+dy));layoutSticker(el);};
+    const up=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);};
+    document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);
+  });
+  el.querySelector('.del').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();
+    EDITOR.stickers=EDITOR.stickers.filter(x=>x!==el);el.remove();});
+  el.querySelector('.rz').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();
+    const r=frame.getBoundingClientRect();
+    const cx=parseFloat(el.dataset.cx)*r.width+r.left, cy=parseFloat(el.dataset.cy)*r.height+r.top;
+    const move=ev=>{const dist=Math.hypot(ev.clientX-cx,ev.clientY-cy);
+      let scale=(dist*2)/r.width;scale=Math.min(1.3,Math.max(0.1,scale));el.dataset.scale=scale;layoutSticker(el);};
+    const up=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);};
+    document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);
+  });
+}
+function editorCancel(){finishEditor(EDITOR.base);}
+async function editorDone(){finishEditor(await composeEditor());}
+function finishEditor(dataUrl){
+  const cb=EDITOR&&EDITOR.onDone;
+  document.getElementById('editor').classList.remove('on');
+  EDITOR=null;
+  if(cb)cb(dataUrl);
+}
+async function composeEditor(){
+  const W=1000,H=750;const c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');
+  const base=await loadImg(EDITOR.base);if(base)drawCover(ctx,base,0,0,W,H);
+  for(const el of EDITOR.stickers){
+    const im=await loadImg(STICKERS[el.dataset.id].img);if(!im)continue;
+    const w=parseFloat(el.dataset.scale)*W, h=w*(im.height/im.width);
+    const cx=parseFloat(el.dataset.cx)*W, cy=parseFloat(el.dataset.cy)*H;
+    ctx.drawImage(im,cx-w/2,cy-h/2,w,h);
+  }
+  const bh=70;ctx.fillStyle='rgba(29,49,40,.82)';ctx.fillRect(0,H-bh,W,bh);
+  ctx.fillStyle='#ffcf3f';ctx.font='700 34px '+RFONT;ctx.textAlign='left';ctx.textBaseline='middle';
+  ctx.fillText(EDITOR.label||'平溪囝仔時光機',30,H-bh/2);
+  ctx.textAlign='right';ctx.fillStyle='rgba(244,239,224,.9)';ctx.font='600 22px system-ui';
+  ctx.fillText('平溪囝仔時光機',W-28,H-bh/2);
   ctx.textAlign='left';ctx.textBaseline='alphabetic';
-  return c.toDataURL('image/jpeg',0.82);
+  return c.toDataURL('image/jpeg',0.85);
 }
 
 /* ---------- 答案判定 ---------- */
@@ -730,9 +862,13 @@ function matchOne(val,accept){const v=NORM(val);if(!v)return false;
 function endStage(st,chat){
   if(!S.stamps.includes(st.n)){S.stamps.push(st.n);save();renderDots();}
   hideAdvance();
+  const next=STAGES[st.n]; // 下一關（st.n 為目前關號，陣列 0-based 即下一關）
   if(st.hint){
     const nh=document.createElement('div');nh.className='next-hint';
-    nh.innerHTML=`<div class="k">🔎 下一站</div><div class="v">「${st.hint}」</div>`;chat.appendChild(nh);
+    let inner=`<div class="k">🔎 下一站</div><div class="v">「${st.hint}」</div>`;
+    if(next){const q=encodeURIComponent(next.map||('平溪 '+next.place));
+      inner+=`<a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">🗺️ 開啟地圖帶我去「${next.place}」</a>`;}
+    nh.innerHTML=inner;chat.appendChild(nh);
   }
   const cont=document.createElement('div');cont.style.padding='6px 0 0';
   cont.innerHTML=`<button class="btn">前往第 ${st.n+1} 關 →</button>`;chat.appendChild(cont);
@@ -762,9 +898,10 @@ function renderItems(){
   const items=["鞭炮","萬金油","地瓜","新衣"];
   document.getElementById('itemGrid').innerHTML=items.map(k=>{
     const st=S.items[k]; if(!st)return '';
-    const d=DEX[k]||{name:k,emo:'🎁'};
+    const d=DEX[k]||{name:k};
     const stTxt=st==='used'?'已使用':'持有中';
-    return `<div class="bp-item ${st==='used'?'used':''}"><span class="emo">${d.emo||'🎁'}</span>
+    const emo=d.img?`<img class="emo" src="${d.img}" alt="" onerror="this.style.display='none'">`:`<span class="emo">🎁</span>`;
+    return `<div class="bp-item ${st==='used'?'used':''}">${emo}
       <div><div class="nm">${d.name}</div><div class="st">${stTxt}</div></div></div>`;
   }).join('')||`<div class="sub" style="grid-column:1/3;color:rgba(244,239,224,.6)">背包還是空的，往前走就會拿到道具囉！</div>`;
 }
@@ -830,8 +967,8 @@ async function buildPostcard(){
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
   ctx.fillStyle='#faf6ea';roundRect(ctx,34,34,W-68,H-68,32);ctx.fill();
   ctx.textAlign='center';ctx.fillStyle='#2f4a3d';
-  ctx.font='700 66px '+RFONT;ctx.fillText('回到平溪那年',W/2,132);
-  ctx.font='600 20px system-ui';ctx.fillStyle='#8a7a55';ctx.fillText('PINGXI OLD STREET · AI 時光機',W/2,168);
+  ctx.font='700 66px '+RFONT;ctx.fillText('平溪囝仔時光機',W/2,132);
+  ctx.font='600 20px system-ui';ctx.fillStyle='#8a7a55';ctx.fillText('PINGXI TIME MACHINE',W/2,168);
   const slots=[["1","平溪車站"],["2","成盈利"],["3","新建成"],["4","觀音巖"],["5a","八仙洞"],["5b","防空洞"],["5c","平安鐘"],["6","美雲布藝"],["7","合照"]];
   const cols=3,gap=18,mx=60,top=200;
   const cw=(W-mx*2-gap*(cols-1))/cols, ch=cw*0.75;
