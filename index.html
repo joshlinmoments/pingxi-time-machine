@@ -20,7 +20,8 @@
   --cream:#f4efe0; --paper:#faf6ea; --gold:#ffcf3f; --gold-deep:#e8b220; --brick:#c0432c;
   --line:rgba(20,31,25,.12); --shadow:0 10px 30px rgba(20,31,25,.18); --r:20px;
   --font: "PingFang TC","Noto Sans TC","Heiti TC","Microsoft JhengHei",system-ui,sans-serif;
-  --serif: "Songti TC","Noto Serif TC","PingFang TC",serif;
+  /* 標題圓體：Apple 系統圓體優先，非 Apple 裝置回退到黑體（絕不用明體） */
+  --serif: "Yuanti TC","Yuanti SC","Hiragino Maru Gothic ProN","Yuppy TC","Yuppy SC","PingFang TC","Noto Sans TC",system-ui,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
@@ -312,6 +313,8 @@ textarea{font-family:inherit}
    ========================================================= */
 
 const XIAOYE="slides/generated/xiaoye-avatar3_20260817_205712.png";
+/* Canvas 標題圓體字（回退黑體，不用明體） */
+const RFONT='"Yuanti TC","Yuanti SC","Hiragino Maru Gothic ProN","PingFang TC","Noto Sans TC",sans-serif';
 const SCENE_IMG={
   1:"slides/generated/scene1-station-v4_20260817_205840.png",
   2:"slides/generated/scene2b-store_20260817_210151.png",
@@ -709,7 +712,7 @@ function compositeFrame(img,fr){
   ctx.fillText(fr.sticker,30,26);
   // 底部標題帶
   const bh=88; ctx.fillStyle=fr.band; ctx.fillRect(0,H-bh,W,bh);
-  ctx.fillStyle='#ffcf3f';ctx.font='700 40px "Songti TC","Noto Serif TC",serif';
+  ctx.fillStyle='#ffcf3f';ctx.font='700 40px '+RFONT;
   ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(fr.label,36,H-bh/2);
   ctx.textAlign='right';ctx.fillStyle='rgba(244,239,224,.9)';ctx.font='600 24px system-ui';
   ctx.fillText('回到平溪那年',W-36,H-bh/2);
@@ -827,7 +830,7 @@ async function buildPostcard(){
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
   ctx.fillStyle='#faf6ea';roundRect(ctx,34,34,W-68,H-68,32);ctx.fill();
   ctx.textAlign='center';ctx.fillStyle='#2f4a3d';
-  ctx.font='700 66px "Songti TC","Noto Serif TC",serif';ctx.fillText('回到平溪那年',W/2,132);
+  ctx.font='700 66px '+RFONT;ctx.fillText('回到平溪那年',W/2,132);
   ctx.font='600 20px system-ui';ctx.fillStyle='#8a7a55';ctx.fillText('PINGXI OLD STREET · AI 時光機',W/2,168);
   const slots=[["1","平溪車站"],["2","成盈利"],["3","新建成"],["4","觀音巖"],["5a","八仙洞"],["5b","防空洞"],["5c","平安鐘"],["6","美雲布藝"],["7","合照"]];
   const cols=3,gap=18,mx=60,top=200;
@@ -846,7 +849,7 @@ async function buildPostcard(){
     ctx.fillText(slots[i][1],x+16,y+ch-15);ctx.textAlign='center';
   }
   const footY=top+3*(ch+gap)+52;
-  ctx.fillStyle='#2f4a3d';ctx.font='700 32px "Songti TC",serif';
+  ctx.fillStyle='#2f4a3d';ctx.font='700 32px '+RFONT;
   ctx.fillText('探險家　'+(S.codename||'平溪小旅人'),W/2,footY);
   ctx.fillStyle='#8a7a55';ctx.font='500 20px system-ui';
   const d=new Date();const ds=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
