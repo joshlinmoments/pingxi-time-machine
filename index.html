@@ -176,10 +176,9 @@ textarea{font-family:inherit}
 .next-hint{background:var(--pine-deep);border-radius:14px;padding:14px 15px;margin:10px 0 4px;border:1px solid var(--line)}
 .next-hint .k{font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:5px}
 .next-hint .v{font-size:15px;color:var(--cream);font-family:var(--serif)}
-.next-hint .map-link{display:block;margin-top:10px;text-align:center;text-decoration:none;
-  background:rgba(255,207,63,.14);border:1px solid rgba(255,207,63,.5);color:var(--gold);
-  border-radius:10px;padding:10px;font-size:14px;font-weight:700}
-.next-hint .map-link:active{background:rgba(255,207,63,.24)}
+.next-hint .map-thumb{width:100%;border-radius:10px;margin-top:10px;border:1px solid rgba(244,239,224,.2);display:block}
+.next-hint .map-cap{font-size:12px;color:rgba(244,239,224,.75);margin-top:7px;text-align:center}
+.next-hint .map-cap b{color:var(--gold)}
 .pad{padding:12px 16px calc(20px + env(safe-area-inset-bottom,0))}
 .hidden{display:none!important}
 
@@ -884,8 +883,10 @@ function endStage(st,chat){
   if(st.hint){
     const nh=document.createElement('div');nh.className='next-hint';
     let inner=`<div class="k">🔎 下一站</div><div class="v">「${st.hint}」</div>`;
-    if(next){const q=encodeURIComponent(next.map||('平溪 '+next.place));
-      inner+=`<a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank" rel="noopener">🗺️ 開啟地圖帶我去「${next.place}」</a>`;}
+    if(next){
+      inner+=`<img class="map-thumb" src="slides/maps/stage${next.n}.png" alt="前往${next.place}的位置" onerror="this.style.display='none'">`;
+      inner+=`<div class="map-cap">🗺️ 紅色 <b>${next.n}</b> 就是「${next.place}」的位置（平溪老街）</div>`;
+    }
     nh.innerHTML=inner;chat.appendChild(nh);
   }
   const cont=document.createElement('div');cont.style.padding='6px 0 0';
