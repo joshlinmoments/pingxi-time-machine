@@ -256,9 +256,9 @@ textarea{font-family:inherit}
 .book-page.cover::after,.book-page.end::after{background:linear-gradient(180deg,rgba(20,31,25,.5),rgba(20,31,25,.5))}
 .book-page .pg-num{position:absolute;top:14px;right:14px;z-index:2;font-size:11px;letter-spacing:1px;color:var(--cream);
   background:rgba(20,31,25,.45);padding:4px 10px;border-radius:99px;backdrop-filter:blur(4px)}
-.book-page .content{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:20px 18px 22px}
+.book-page .content{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:20px 18px 26px}
 .book-page.cover .content,.book-page.end .content{inset:0;display:flex;flex-direction:column;
-  justify-content:center;align-items:center;text-align:center;padding:28px}
+  justify-content:flex-end;align-items:center;text-align:center;padding:28px 28px 46px}
 .book-page .en{font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:5px}
 .book-page .place{font-family:var(--serif);font-size:29px;font-weight:800;color:#fff;line-height:1.12;
   text-shadow:0 2px 14px rgba(0,0,0,.55)}
@@ -273,6 +273,8 @@ textarea{font-family:inherit}
 .book-dots{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:12px}
 .book-dots i{width:7px;height:7px;border-radius:50%;background:rgba(244,239,224,.28);transition:.2s}
 .book-dots i.on{background:var(--gold);transform:scale(1.2)}
+.book-dl{display:flex;gap:10px;margin-top:12px}
+.book-dl .btn{margin-top:0}
 .postcard-wrap{width:100%;margin-top:18px}
 .postcard-wrap h3{font-family:var(--serif);font-size:18px;margin:0 0 4px}
 .postcard-wrap .sub{font-size:12px;color:rgba(244,239,224,.6);margin-bottom:12px}
@@ -351,6 +353,10 @@ textarea{font-family:inherit}
       <button class="book-nav next" onclick="flipBook(1)" aria-label="下一頁">›</button>
     </div>
     <div class="book-dots" id="bookDots"></div>
+    <div class="book-dl">
+      <button class="btn sm" onclick="downloadPage()">⬇️ 下載這一頁</button>
+      <button class="btn sm ghost" onclick="downloadAllPages(this)">⬇️ 下載整本</button>
+    </div>
 
     <div class="postcard-wrap" style="margin-top:22px">
       <h3>🖼️ 順手做了張明信片</h3>
@@ -1058,10 +1064,87 @@ function buildBook(){
     }
     book.appendChild(el);
   });
-  BOOK_PAGES=total;
+  BOOK_PAGES=total; BOOK_DATA=pages; BOOK_IDX=0;
   renderBookDots(0);
-  book.onscroll=()=>{const i=Math.round(book.scrollLeft/book.clientWidth);renderBookDots(i);};
+  book.onscroll=()=>{const i=Math.round(book.scrollLeft/book.clientWidth);BOOK_IDX=i;renderBookDots(i);};
   const sub=document.getElementById('jbSub');if(sub)sub.textContent=`　${S.codename||'平溪小旅人'} · 共 ${total} 頁`;
+}
+
+/* ---- 寫真頁下載（合成為圖片） ---- */
+let BOOK_DATA=[], BOOK_IDX=0;
+const FONT_SANS='"PingFang TC","Noto Sans TC","Heiti TC",system-ui,sans-serif';
+function bgGrad(ctx,W,H){const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#3f6151');g.addColorStop(1,'#141f19');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+function wrapCJK(ctx,text,maxW){
+  const out=[];
+  (text||'').split('\n').forEach(para=>{
+    let line='';
+    for(const ch of para){
+      if(ctx.measureText(line+ch).width>maxW && line){out.push(line);line=ch;}
+      else line+=ch;
+    }
+    out.push(line);
+  });
+  return out;
+}
+function fitFont(ctx,text,maxW,startPx,weight,fam){let px=startPx;do{ctx.font=`${weight} ${px}px ${fam}`;}while(ctx.measureText(text).width>maxW&&(px-=2)>18);return px;}
+async function composePage(pg){
+  const W=900,H=1200,c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');
+  if(pg.bg){const im=await loadImg(pg.bg);if(im)drawCover(ctx,im,0,0,W,H);else bgGrad(ctx,W,H);}else bgGrad(ctx,W,H);
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(20,31,25,.12)');g.addColorStop(.5,'rgba(20,31,25,0)');g.addColorStop(1,'rgba(20,31,25,.92)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  const pad=52, maxW=W-pad*2;
+  if(pg.type==='cover'||pg.type==='end'){
+    ctx.fillStyle='rgba(20,31,25,.45)';ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';const cxc=W/2;let y=H*0.60;
+    ctx.fillStyle='#ffcf3f';ctx.font='600 26px system-ui';
+    ctx.fillText(pg.type==='cover'?'MY PINGXI PHOTO DIARY':'THE END · 完',cxc,y);y+=64;
+    ctx.fillStyle='#f4efe0';ctx.font='800 64px '+RFONT;
+    ctx.fillText(pg.type==='cover'?'我的平溪寫真':'回到平溪那年',cxc,y);y+=28;
+    ctx.strokeStyle='#ffcf3f';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(cxc-42,y);ctx.lineTo(cxc+42,y);ctx.stroke();y+=52;
+    if(pg.type==='cover'){ctx.fillStyle='#f4efe0';ctx.font='600 32px '+RFONT;ctx.fillText('探險家　'+(S.codename||'平溪小旅人'),cxc,y);y+=42;
+      ctx.fillStyle='rgba(244,239,224,.72)';ctx.font='500 22px system-ui';ctx.fillText(dateStr()+'　·　打卡 '+S.stamps.length+'/7',cxc,y);}
+    else{ctx.fillStyle='rgba(244,239,224,.88)';ctx.font='500 26px '+RFONT;ctx.fillText('謝謝你陪小葉走這一趟 🏮',cxc,y);}
+    ctx.textAlign='left';return c.toDataURL('image/jpeg',0.9);
+  }
+  // 內頁：文字靠下
+  ctx.textAlign='left';
+  let y=H-pad;
+  if(pg.cap){ctx.fillStyle='rgba(255,255,255,.82)';ctx.font='400 24px '+FONT_SANS;ctx.fillText('📸 '+pg.cap,pad,y);y-=42;}
+  const body=pg.note||pg.story||'';
+  if(body){
+    ctx.font='400 30px '+FONT_SANS;const lines=wrapCJK(ctx,body,maxW-32);
+    const lh=44,boxH=lines.length*lh+26,boxTop=y-boxH;
+    ctx.fillStyle='rgba(20,31,25,.5)';roundRect(ctx,pad,boxTop,maxW,boxH,12);ctx.fill();
+    ctx.fillStyle='#ffcf3f';ctx.fillRect(pad,boxTop,5,boxH);
+    ctx.fillStyle='#fff';ctx.font='400 30px '+FONT_SANS;let ty=boxTop+26+18;
+    lines.forEach(l=>{ctx.fillText(l,pad+22,ty);ty+=lh;});
+    y=boxTop-24;
+  }
+  ctx.strokeStyle='#ffcf3f';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(pad+66,y);ctx.stroke();y-=30;
+  const ppx=fitFont(ctx,pg.place,maxW,64,'800',RFONT);
+  ctx.fillStyle='#fff';ctx.font=`800 ${ppx}px ${RFONT}`;ctx.fillText(pg.place,pad,y);y-=Math.round(ppx*0.55)+14;
+  ctx.fillStyle='#ffcf3f';ctx.font='600 24px system-ui';ctx.fillText('STAGE '+pg.num+' · '+pg.en,pad,y);
+  return c.toDataURL('image/jpeg',0.9);
+}
+function triggerDL(url,name){const a=document.createElement('a');a.download=name;a.href=url;document.body.appendChild(a);a.click();a.remove();}
+async function downloadPage(){
+  if(!BOOK_DATA.length)return;
+  const pg=BOOK_DATA[BOOK_IDX]||BOOK_DATA[0];
+  const url=await composePage(pg);
+  const nm=pg.type==='cover'?'封面':pg.type==='end'?'封底':(pg.place||'頁');
+  triggerDL(url,`平溪寫真_${String(BOOK_IDX+1).padStart(2,'0')}_${nm}.jpg`);
+}
+async function downloadAllPages(btn){
+  if(!BOOK_DATA.length)return;
+  const old=btn?btn.textContent:''; if(btn){btn.disabled=true;}
+  for(let i=0;i<BOOK_DATA.length;i++){
+    if(btn)btn.textContent=`下載中 ${i+1}/${BOOK_DATA.length}`;
+    const pg=BOOK_DATA[i];const url=await composePage(pg);
+    const nm=pg.type==='cover'?'封面':pg.type==='end'?'封底':(pg.place||'頁');
+    triggerDL(url,`平溪寫真_${String(i+1).padStart(2,'0')}_${nm}.jpg`);
+    await new Promise(r=>setTimeout(r,500));
+  }
+  if(btn){btn.disabled=false;btn.textContent=old;}
 }
 function renderBookDots(active){
   const d=document.getElementById('bookDots');if(!d)return;d.innerHTML='';
