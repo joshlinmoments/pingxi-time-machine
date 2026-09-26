@@ -396,16 +396,22 @@ const ITEM_IMG={
 };
 
 /* ---------- 圖鑑主檔 ---------- */
+const CHAR_IMG={
+  "芸芸":"slides/stickers/char-yunyun.png",
+  "阿任":"slides/stickers/char-aren.png",
+  "美雲阿姨":"slides/stickers/char-meiyun.png",
+  "大乾媽":"slides/stickers/char-godmother.png",
+};
 const DEX={
   "小葉":{name:"小葉",img:XIAOYE,desc:"平溪最強嚮導，愛吹牛、超有人情味。"},
-  "芸芸":{name:"芸芸",emo:"👧",desc:"愛歷史的女孩，最愛躲在八仙洞玩碟仙。"},
-  "阿任":{name:"阿任",emo:"👦",desc:"皮蛋一枚，躲在相通的防空洞裡打鞭炮大戰。"},
-  "大乾媽":{name:"大乾媽",emo:"🙏",desc:"觀音媽，全平溪人的大乾媽，聚落的起點。"},
-  "美雲阿姨":{name:"美雲阿姨",emo:"🧵",desc:"美雲布藝的老闆，過年新衣都靠她。"},
-  "鞭炮":{name:"鞭炮",img:ITEM_IMG["鞭炮"],desc:"成盈利拿到，後山用來炸出躲藏的阿任。"},
-  "萬金油":{name:"萬金油",img:ITEM_IMG["萬金油"],desc:"新建成拿到，鞭炮大戰後互相療傷。"},
-  "地瓜":{name:"地瓜",img:ITEM_IMG["地瓜"],desc:"平安鐘烘窯烤出來的，香噴噴（來源成謎）。"},
-  "新衣":{name:"新衣",img:ITEM_IMG["新衣"],desc:"美雲阿姨做的新衣，過年的儀式感。"},
+  "芸芸":{name:"芸芸",img:CHAR_IMG["芸芸"],desc:"小葉的青梅竹馬，愛歷史、鬼靈精怪的女孩。"},
+  "阿任":{name:"阿任",img:CHAR_IMG["阿任"],desc:"小葉的死黨，調皮搗蛋、鬼點子最多的男孩。"},
+  "大乾媽":{name:"大乾媽",img:CHAR_IMG["大乾媽"],desc:"觀音媽，全平溪人的大乾媽，聚落的起點與守護。"},
+  "美雲阿姨":{name:"美雲阿姨",img:CHAR_IMG["美雲阿姨"],desc:"美雲布藝的老闆，一手好裁縫，過年新衣都靠她。"},
+  "鞭炮":{name:"鞭炮",img:ITEM_IMG["鞭炮"],desc:"成盈利老闆神秘塞來的一大袋——「不要問，拿著就對了！」"},
+  "萬金油":{name:"萬金油",img:ITEM_IMG["萬金油"],desc:"新建成百貨的百寶油，山城人家家必備，哪裡不舒服都能擦。"},
+  "地瓜":{name:"地瓜",img:ITEM_IMG["地瓜"],desc:"熱騰騰、香噴噴的現烤地瓜，冷天裡最療癒（來源嘛…嘿嘿）。"},
+  "新衣":{name:"新衣",img:ITEM_IMG["新衣"],desc:"剪裁合身的新衣裳，穿上它，年味就來了。"},
 };
 
 /* ---------- 貼紙（拍照後可自由擺放） ---------- */
@@ -418,15 +424,19 @@ const STICKERS={
   sweetpotato:{img:"slides/stickers/item-sweetpotato.png", name:"烤地瓜"},
   tarobowl:{img:"slides/stickers/st-tarobowl.png", name:"芋圓"},
   fireworks:{img:"slides/stickers/st-fireworks.png", name:"煙火"},
+  lantern:{img:"slides/stickers/st-lantern.png", name:"天燈"},
   xiaoye:{img:XIAOYE_STICKER, name:"小葉"},
+  yunyun:{img:"slides/stickers/char-yunyun.png", name:"芸芸"},
+  aren:{img:"slides/stickers/char-aren.png", name:"阿任"},
 };
 /* 每個拍照點提供的貼紙（呼應動作） */
 const STICKER_SETS={
-  "5a":["planchette","fireworks","xiaoye"],
-  "5b":["explosion","firecracker","xiaoye"],
-  "5c":["sweetpotato","flames","xiaoye"],
-  "7":["xiaoye","tarobowl","fireworks"],
-  "_default":["xiaoye","fireworks"],
+  "1":["lantern","xiaoye","fireworks"],
+  "5a":["planchette","yunyun","fireworks","xiaoye"],
+  "5b":["explosion","firecracker","aren","xiaoye"],
+  "5c":["sweetpotato","flames","lantern","xiaoye"],
+  "7":["xiaoye","yunyun","aren","tarobowl","fireworks","lantern"],
+  "_default":["xiaoye","lantern","fireworks"],
 };
 function stickersFor(slot){return STICKER_SETS[slot]||STICKER_SETS._default;}
 
