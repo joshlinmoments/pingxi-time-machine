@@ -239,6 +239,40 @@ textarea{font-family:inherit}
 .jb-note{background:rgba(255,207,63,.08);border:1px dashed rgba(255,207,63,.4);border-radius:10px;padding:9px 12px;margin-top:6px}
 .jb-note .qp{font-size:11px;color:var(--gold);margin-bottom:3px}
 .jb-note .an{font-size:14px;color:var(--cream)}
+/* 平溪寫真書 */
+.fin-title{font-family:var(--serif);font-size:22px;font-weight:800;color:var(--cream);text-align:center;margin:2px 0 14px}
+.fin-title small{display:block;font-family:var(--font);font-size:12px;font-weight:400;color:rgba(244,239,224,.6);margin-top:3px}
+.book-wrap{position:relative;width:100%}
+.book{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  border-radius:18px;scrollbar-width:none;box-shadow:var(--shadow)}
+.book::-webkit-scrollbar{display:none}
+.book-page{position:relative;flex:0 0 100%;scroll-snap-align:center;aspect-ratio:3/4;
+  background:#1d3128;overflow:hidden}
+.book-page .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.book-page .bg.nopic{background:linear-gradient(160deg,#3f6151,#1d3128)}
+.book-page::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(20,31,25,.12) 0%,rgba(20,31,25,0) 32%,rgba(20,31,25,.9) 100%)}
+.book-page.cover,.book-page.end{background:linear-gradient(160deg,#3f6151,#141f19)}
+.book-page.cover::after,.book-page.end::after{background:linear-gradient(180deg,rgba(20,31,25,.5),rgba(20,31,25,.5))}
+.book-page .pg-num{position:absolute;top:14px;right:14px;z-index:2;font-size:11px;letter-spacing:1px;color:var(--cream);
+  background:rgba(20,31,25,.45);padding:4px 10px;border-radius:99px;backdrop-filter:blur(4px)}
+.book-page .content{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:20px 18px 22px}
+.book-page.cover .content,.book-page.end .content{inset:0;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;padding:28px}
+.book-page .en{font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:5px}
+.book-page .place{font-family:var(--serif);font-size:29px;font-weight:800;color:#fff;line-height:1.12;
+  text-shadow:0 2px 14px rgba(0,0,0,.55)}
+.book-page .big{font-family:var(--serif);font-size:32px;font-weight:800;color:var(--cream)}
+.book-page .rule{width:44px;height:3px;background:var(--gold);border-radius:2px;margin:11px 0}
+.book-page .note{font-size:14.5px;color:#fff;line-height:1.65;background:rgba(20,31,25,.4);
+  border-left:3px solid var(--gold);padding:9px 13px;border-radius:9px;backdrop-filter:blur(3px)}
+.book-page .cap{font-size:12px;color:rgba(255,255,255,.8);margin-top:9px}
+.book-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:38px;height:38px;border-radius:50%;
+  background:rgba(20,31,25,.5);color:#fff;font-size:22px;display:grid;place-items:center;backdrop-filter:blur(4px)}
+.book-nav.prev{left:8px}.book-nav.next{right:8px}
+.book-dots{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.book-dots i{width:7px;height:7px;border-radius:50%;background:rgba(244,239,224,.28);transition:.2s}
+.book-dots i.on{background:var(--gold);transform:scale(1.2)}
 .postcard-wrap{width:100%;margin-top:18px}
 .postcard-wrap h3{font-family:var(--serif);font-size:18px;margin:0 0 4px}
 .postcard-wrap .sub{font-size:12px;color:rgba(244,239,224,.6);margin-bottom:12px}
@@ -308,26 +342,25 @@ textarea{font-family:inherit}
     <div class="pad"><button class="btn" id="advance" onclick="advance()">繼續 ▾</button></div>
   </section>
 
-  <!-- 小小遊記 -->
+  <!-- 平溪寫真書 -->
   <section class="screen" id="finale">
-    <div class="jb-head">
-      <div class="seal">📖</div>
-      <h2>我的平溪小小遊記</h2>
-      <div class="en">MY LITTLE PINGXI JOURNAL</div>
-      <div class="who">探險家<b id="jbName">—</b><br><span id="jbDate" style="font-size:12px;color:rgba(244,239,224,.6)"></span></div>
-      <div class="jb-dex" id="jbDex"></div>
+    <div class="fin-title">📖 我的平溪寫真書<small id="jbSub"></small></div>
+    <div class="book-wrap">
+      <div class="book" id="book"></div>
+      <button class="book-nav prev" onclick="flipBook(-1)" aria-label="上一頁">‹</button>
+      <button class="book-nav next" onclick="flipBook(1)" aria-label="下一頁">›</button>
     </div>
-    <div id="journeyBook"></div>
+    <div class="book-dots" id="bookDots"></div>
 
-    <div class="postcard-wrap">
-      <h3>🖼️ 你的平溪明信片</h3>
-      <div class="sub">一路拍下的照片，自動拼成一張回憶明信片</div>
+    <div class="postcard-wrap" style="margin-top:22px">
+      <h3>🖼️ 順手做了張明信片</h3>
+      <div class="sub">一路照片自動拼貼，可儲存分享</div>
       <canvas id="postcard" width="1000" height="1060"></canvas>
     </div>
 
     <div style="width:100%;margin-top:18px">
       <button class="btn" id="dlBtn" onclick="downloadPostcard()">⬇️ 儲存明信片</button>
-      <button class="btn ghost" onclick="openBag()">🎒 查看背包 · 圖鑑 · 相簿</button>
+      <button class="btn ghost" onclick="openBag()">🎒 背包 · 圖鑑 · 相簿</button>
       <button class="btn ghost" onclick="restart()">重新開始</button>
     </div>
   </section>
@@ -401,6 +434,7 @@ const CHAR_IMG={
   "阿任":"slides/stickers/char-aren.png",
   "美雲阿姨":"slides/stickers/char-meiyun.png",
   "大乾媽":"slides/stickers/char-godmother.png",
+  "芋圓奶奶":"slides/stickers/char-tarogranny.png",
 };
 const DEX={
   "小葉":{name:"小葉",img:XIAOYE,desc:"平溪最強嚮導，愛吹牛、超有人情味。"},
@@ -408,6 +442,7 @@ const DEX={
   "阿任":{name:"阿任",img:CHAR_IMG["阿任"],desc:"小葉的死黨，調皮搗蛋、鬼點子最多的男孩。"},
   "大乾媽":{name:"大乾媽",img:CHAR_IMG["大乾媽"],desc:"觀音媽，全平溪人的大乾媽，聚落的起點與守護。"},
   "美雲阿姨":{name:"美雲阿姨",img:CHAR_IMG["美雲阿姨"],desc:"美雲布藝的老闆，一手好裁縫，過年新衣都靠她。"},
+  "芋圓奶奶":{name:"芋圓奶奶",img:CHAR_IMG["芋圓奶奶"],desc:"平溪芋圓老店的奶奶，笑口常開，最愛看囝仔穿新衫。"},
   "鞭炮":{name:"鞭炮",img:ITEM_IMG["鞭炮"],desc:"成盈利老闆神秘塞來的一大袋——「不要問，拿著就對了！」"},
   "萬金油":{name:"萬金油",img:ITEM_IMG["萬金油"],desc:"新建成百貨的百寶油，山城人家家必備，哪裡不舒服都能擦。"},
   "地瓜":{name:"地瓜",img:ITEM_IMG["地瓜"],desc:"熱騰騰、香噴噴的現烤地瓜，冷天裡最療癒（來源嘛…嘿嘿）。"},
@@ -431,6 +466,7 @@ const STICKERS={
   xiaoye:{img:XIAOYE_STICKER, name:"小葉"},
   yunyun:{img:"slides/stickers/char-yunyun.png", name:"芸芸"},
   aren:{img:"slides/stickers/char-aren.png", name:"阿任"},
+  granny:{img:"slides/stickers/char-tarogranny.png", name:"芋圓奶奶"},
 };
 /* 每個拍照點提供的貼紙（呼應動作） */
 const STICKER_SETS={
@@ -438,7 +474,7 @@ const STICKER_SETS={
   "5a":["diexianpaper","yunyun","fireworks","xiaoye"],
   "5b":["explosion","firecracker","aren","xiaoye"],
   "5c":["potatoskewer","campfire","lantern","xiaoye"],
-  "7":["xiaoye","yunyun","aren","tarobowl","fireworks","lantern"],
+  "7":["xiaoye","yunyun","aren","granny","tarobowl","fireworks","lantern"],
   "_default":["xiaoye","lantern","fireworks"],
 };
 function stickersFor(slot){return STICKER_SETS[slot]||STICKER_SETS._default;}
@@ -530,6 +566,7 @@ const STAGES=[
     {t:"photo", slot:"5c", label:"平安鐘・烤地瓜", prompt:"用趣味相框，拍一張「你在平安鐘烤地瓜」的畫面！"},
     {t:"get", item:"地瓜", x:"烤好啦！小葉遞給你一顆「香噴噴的現烤地瓜」🍠！（至於地瓜哪來的…嘿嘿，這就不好說了！）"},
     {t:"dex", who:"地瓜"},
+    {t:"use", need:"地瓜", label:"趁熱吃掉烤地瓜 🍠", x:"趁熱咬一大口——燙！但又香又綿，這就是山頂上的幸福味 😋"},
     {t:"stamp"},
   ]},
 
@@ -557,8 +594,11 @@ const STAGES=[
   beats:[
     {t:"ye", x:"呼～這一圈走下來，你已經不只是遊客，是我認證的「平溪囝仔」了！從火車站、柑仔店、百貨行、乾媽家，到後山那場鞭炮大戰…謝謝你陪我回到平溪的那些年。"},
     {t:"scene"},
-    {t:"ye", x:"來清點你的收穫——🧨鞭炮、💨萬金油、🍠地瓜、👕新衣，還有你收服的「平溪囝仔圖鑑」：小葉、芸芸、阿任、大乾媽，全員到齊！（點右上角 🎒 隨時看）"},
-    {t:"photo", slot:"7", label:"回到平溪那年・合照", prompt:"用專屬合照框，跟我、芸芸、阿任合照一張吧！📸"},
+    {t:"ye", x:"來清點這一路的回憶——鞭炮大戰、萬金油、山頂烤地瓜、還有一身新衣裳，以及你收服的「平溪囝仔圖鑑」：小葉、芸芸、阿任、大乾媽…全員到齊！（點右上角 🎒 隨時看）"},
+    {t:"ye", x:"欸，賣芋圓的奶奶就在那！來，穿著你這身新衣，去跟奶奶炫耀一下——她最愛看囝仔穿新衫了！"},
+    {t:"use", need:"新衣", label:"向芋圓奶奶炫耀新衣 👕✨", x:"奶奶笑得合不攏嘴：「哎唷～這囝仔穿新衫真緣投！來，芋圓多加你一勺！」"},
+    {t:"dex", who:"芋圓奶奶"},
+    {t:"photo", slot:"7", label:"回到平溪那年・合照", prompt:"用專屬合照框，跟我、芸芸、阿任、芋圓奶奶合照一張吧！📸"},
     {t:"open", key:"j7", prompt:"旅程的最後，寫一句話送給這趟「回到平溪那年」，也送給小葉吧。",
       warm:"收到！這會是你遊記最美的結尾 💌"},
     {t:"stamp"},
@@ -580,7 +620,7 @@ function go(where){
   document.getElementById('topbar').classList.toggle('hidden', where==='cover');
   if(where==='cover'){document.getElementById('cover').classList.add('on');return;}
   if(where==='intro'){ S.stage=Math.max(S.stage,1); save(); renderStage(); return; }
-  if(where==='finale'){ document.getElementById('finale').classList.add('on'); renderJourney(); buildPostcard(); renderDots(); window.scrollTo(0,0); return; }
+  if(where==='finale'){ document.getElementById('finale').classList.add('on'); buildBook(); buildPostcard(); renderDots(); window.scrollTo(0,0); return; }
 }
 
 /* ---------- 進度點 + 收藏數 ---------- */
@@ -949,7 +989,7 @@ function renderStamps(){
       <div class="nm" style="color:var(--gold)">打卡進度 ${done} / 7</div></div>`;
 }
 function renderDex(){
-  const order=["小葉","芸芸","阿任","大乾媽","美雲阿姨","鞭炮","萬金油","地瓜","新衣"];
+  const order=["小葉","芸芸","阿任","大乾媽","美雲阿姨","芋圓奶奶","鞭炮","萬金油","地瓜","新衣"];
   document.getElementById('dexGrid').innerHTML=order.map(k=>{
     const d=DEX[k]; const got=S.dex[k];
     const emo=d.img?`<img src="${d.img}" alt="">`:(d.emo||'❔');
@@ -968,27 +1008,66 @@ function renderAlbum(){
   }).join('');
 }
 
-/* ---------- 小小遊記 ---------- */
-function renderJourney(){
-  document.getElementById('jbName').textContent=S.codename||'平溪小旅人';
-  const d=new Date();
-  document.getElementById('jbDate').textContent=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
-  const order=["小葉","芸芸","阿任","大乾媽","美雲阿姨","鞭炮","萬金油","地瓜","新衣"];
-  document.getElementById('jbDex').innerHTML=order.filter(k=>S.dex[k]).map(k=>`<span title="${DEX[k].name}">${DEX[k].img?'🧑':(DEX[k].emo||'⭐')}</span>`).join('');
-  const book=document.getElementById('journeyBook');book.innerHTML='';
-  STAGES.forEach(st=>{
-    const photos=Object.entries(S.album).filter(([slot,p])=>p&&p.stage===st.n);
-    const notes=Object.values(S.journal).filter(j=>j.stage===st.n);
-    if(!photos.length&&!notes.length) return;
-    let html=`<div class="jb-card"><div class="pl">${st.place}<small>STAGE ${st.n}</small></div>
-      <div class="story">${st.story||''}</div>`;
-    if(photos.length){html+=`<div class="jb-photos">`+photos.map(([slot,p])=>`<img src="${p.data}" alt="">`).join('')+`</div>`;}
-    notes.forEach(nn=>{html+=`<div class="jb-note"><div class="qp">${nn.prompt}</div><div class="an">${escapeHtml(nn.text)}</div></div>`;});
-    html+=`</div>`; book.insertAdjacentHTML('beforeend',html);
-  });
-  if(!book.innerHTML){book.innerHTML=`<div class="jb-card"><div class="story">這趟旅程還沒留下文字或照片——回去走一遍，邊玩邊記錄，就會長出你專屬的小小遊記囉！</div></div>`;}
-}
+/* ---------- 平溪寫真書（翻頁瀏覽） ---------- */
+let BOOK_PAGES=0;
 function escapeHtml(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function dateStr(){const d=new Date();return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');}
+function firstPhoto(){for(const st of STAGES){for(const k of Object.keys(S.album)){const p=S.album[k];if(p&&p.stage===st.n)return p.data;}}return null;}
+function enTail(en){return (en||'').split('·').pop().trim();}
+function buildBook(){
+  const book=document.getElementById('book');book.innerHTML='';
+  const pages=[];
+  pages.push({type:'cover', bg:firstPhoto()});
+  STAGES.forEach(st=>{
+    const photos=Object.keys(S.album).filter(k=>S.album[k]&&S.album[k].stage===st.n).map(k=>S.album[k]);
+    const note=Object.values(S.journal).filter(j=>j.stage===st.n).map(j=>j.text).join('\n');
+    if(photos.length){
+      photos.forEach((p,i)=>pages.push({type:'page',bg:p.data,place:st.place,en:enTail(st.en),num:st.n,
+        note:i===0?note:'',cap:p.label,story:i===0?st.story:''}));
+    }else if(note){
+      pages.push({type:'page',bg:null,place:st.place,en:enTail(st.en),num:st.n,note,cap:'',story:st.story});
+    }
+  });
+  pages.push({type:'end'});
+  const total=pages.length;
+  pages.forEach((pg,idx)=>{
+    const el=document.createElement('div');
+    if(pg.type==='cover'){
+      el.className='book-page cover';
+      el.innerHTML=(pg.bg?`<img class="bg" src="${pg.bg}">`:'')
+        +`<div class="content"><div class="en">MY PINGXI PHOTO DIARY</div>
+           <div class="big">我的平溪寫真</div><div class="rule" style="margin:14px auto"></div>
+           <div style="color:var(--cream);font-size:15px">探險家　${escapeHtml(S.codename||'平溪小旅人')}</div>
+           <div style="color:rgba(244,239,224,.65);font-size:12px;margin-top:4px">${dateStr()}　·　打卡 ${S.stamps.length}/7</div>
+           <div style="color:rgba(244,239,224,.6);font-size:12px;margin-top:16px">← 左右滑動翻頁 →</div></div>`;
+    }else if(pg.type==='end'){
+      el.className='book-page end';
+      el.innerHTML=`<div class="content"><div class="big">回到平溪那年</div>
+        <div class="en" style="color:var(--gold)">THE END · 完</div><div class="rule" style="margin:14px auto"></div>
+        <div style="color:rgba(244,239,224,.88);font-size:14px;max-width:82%;line-height:1.7">謝謝你陪小葉走這一趟。<br>有空要再回來平溪喔！🏮</div></div>`;
+    }else{
+      el.className='book-page';
+      const body=pg.note?escapeHtml(pg.note).replace(/\n/g,'<br>'):(pg.story||'');
+      el.innerHTML=(pg.bg?`<img class="bg" src="${pg.bg}">`:`<div class="bg nopic"></div>`)
+        +`<div class="pg-num">${idx+1} / ${total}</div>`
+        +`<div class="content"><div class="en">STAGE ${pg.num} · ${escapeHtml(pg.en)}</div>
+           <div class="place">${pg.place}</div><div class="rule"></div>`
+        +(body?`<div class="note">${body}</div>`:'')
+        +(pg.cap?`<div class="cap">📸 ${pg.cap}</div>`:'')
+        +`</div>`;
+    }
+    book.appendChild(el);
+  });
+  BOOK_PAGES=total;
+  renderBookDots(0);
+  book.onscroll=()=>{const i=Math.round(book.scrollLeft/book.clientWidth);renderBookDots(i);};
+  const sub=document.getElementById('jbSub');if(sub)sub.textContent=`　${S.codename||'平溪小旅人'} · 共 ${total} 頁`;
+}
+function renderBookDots(active){
+  const d=document.getElementById('bookDots');if(!d)return;d.innerHTML='';
+  for(let i=0;i<BOOK_PAGES;i++){const el=document.createElement('i');if(i===active)el.className='on';d.appendChild(el);}
+}
+function flipBook(dir){const book=document.getElementById('book');book.scrollBy({left:dir*book.clientWidth,behavior:'smooth'});}
 
 /* ---------- 明信片（Canvas 3×3） ---------- */
 function loadImg(src){return new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=src;});}
@@ -1054,8 +1133,8 @@ function restart(){ if(confirm('確定要清除進度、重新開始嗎？')){S=
 (function init(){
   const ci=document.getElementById('coverImg');ci.src=SCENE_IMG[1];
   ci.onerror=()=>{ci.style.display='none';document.querySelector('.cover-hero').style.background='linear-gradient(160deg,#3f6151,#1d3128)';};
-  if(S.done){document.querySelector('#cover .cover-body p').innerHTML='你已完成旅程！可回顧你的平溪小小遊記與明信片，或重新開始。';
-    document.querySelector('#cover .cta').textContent='查看小小遊記 📖';
+  if(S.done){document.querySelector('#cover .cover-body p').innerHTML='你已完成旅程！可翻閱你的平溪寫真書與明信片，或重新開始。';
+    document.querySelector('#cover .cta').textContent='翻閱平溪寫真書 📖';
     document.querySelector('#cover .cta').setAttribute('onclick',"go('finale')");}
   else if(S.stage>1){document.querySelector('#cover .cta').textContent='繼續走讀（第 '+S.stage+' 關）→';}
 })();
