@@ -348,8 +348,8 @@ textarea{font-family:inherit}
     </div>
     <div class="book-dots" id="bookDots"></div>
     <div class="book-dl">
-      <button class="btn sm" onclick="downloadPage()">⬇️ 下載這一頁</button>
-      <button class="btn sm ghost" onclick="downloadAllPages(this)">⬇️ 下載整本</button>
+      <button class="btn sm" onclick="downloadPage()">📥 存這一頁到相簿</button>
+      <button class="btn sm ghost" onclick="downloadAllPages(this)">📥 存整本</button>
     </div>
 
     <div class="postcard-wrap" style="margin-top:22px">
@@ -359,7 +359,7 @@ textarea{font-family:inherit}
     </div>
 
     <div style="width:100%;margin-top:18px">
-      <button class="btn" id="dlBtn" onclick="downloadPostcard()">⬇️ 儲存明信片</button>
+      <button class="btn" id="dlBtn" onclick="downloadPostcard()">📥 存明信片到相簿</button>
       <button class="btn ghost" onclick="openBag()">🎒 背包 · 圖鑑 · 相簿</button>
       <button class="btn ghost" onclick="restart()">重新開始</button>
     </div>
@@ -1120,25 +1120,49 @@ async function composePage(pg){
   ctx.fillStyle='#ffcf3f';ctx.font='600 24px system-ui';ctx.fillText('STAGE '+pg.num+' · '+pg.en,pad,y);
   return c.toDataURL('image/jpeg',0.9);
 }
+async function dataURLtoFile(dataUrl,name){const res=await fetch(dataUrl);const blob=await res.blob();return new File([blob],name,{type:blob.type||'image/jpeg'});}
 function triggerDL(url,name){const a=document.createElement('a');a.download=name;a.href=url;document.body.appendChild(a);a.click();a.remove();}
+/* 存到相簿：行動裝置用 Web Share（可選「儲存影像」到照片），桌機退回下載 */
+async function saveImage(dataUrl,name){
+  try{
+    const file=await dataURLtoFile(dataUrl,name);
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'平溪囝仔時光機'});
+      return true;
+    }
+  }catch(e){ if(e && e.name==='AbortError') return true; }
+  triggerDL(dataUrl,name);
+  return false;
+}
+async function shareImages(files){
+  try{
+    if(navigator.canShare && navigator.canShare({files})){
+      await navigator.share({files, title:'平溪寫真書'});
+      return true;
+    }
+  }catch(e){ if(e && e.name==='AbortError') return true; }
+  return false;
+}
 async function downloadPage(){
   if(!BOOK_DATA.length)return;
   const pg=BOOK_DATA[BOOK_IDX]||BOOK_DATA[0];
   const url=await composePage(pg);
   const nm=pg.type==='cover'?'封面':pg.type==='end'?'封底':(pg.place||'頁');
-  triggerDL(url,`平溪寫真_${String(BOOK_IDX+1).padStart(2,'0')}_${nm}.jpg`);
+  await saveImage(url,`平溪寫真_${String(BOOK_IDX+1).padStart(2,'0')}_${nm}.jpg`);
 }
 async function downloadAllPages(btn){
   if(!BOOK_DATA.length)return;
-  const old=btn?btn.textContent:''; if(btn){btn.disabled=true;}
+  const old=btn?btn.textContent:''; if(btn){btn.disabled=true;btn.textContent='準備中…';}
+  const files=[];
   for(let i=0;i<BOOK_DATA.length;i++){
-    if(btn)btn.textContent=`下載中 ${i+1}/${BOOK_DATA.length}`;
     const pg=BOOK_DATA[i];const url=await composePage(pg);
     const nm=pg.type==='cover'?'封面':pg.type==='end'?'封底':(pg.place||'頁');
-    triggerDL(url,`平溪寫真_${String(i+1).padStart(2,'0')}_${nm}.jpg`);
-    await new Promise(r=>setTimeout(r,500));
+    files.push(await dataURLtoFile(url,`平溪寫真_${String(i+1).padStart(2,'0')}_${nm}.jpg`));
   }
   if(btn){btn.disabled=false;btn.textContent=old;}
+  // 一次分享全部（行動裝置可一次存到相簿）；不支援則逐張下載
+  const ok=await shareImages(files);
+  if(!ok){for(const f of files){triggerDL(URL.createObjectURL(f),f.name);await new Promise(r=>setTimeout(r,400));}}
 }
 function renderBookDots(active){
   const d=document.getElementById('bookDots');if(!d)return;d.innerHTML='';
@@ -1162,11 +1186,14 @@ function roundRect(ctx,x,y,w,h,r){ctx.beginPath();
 async function pcCell(ctx,data,x,y,w,h,label,big){
   ctx.save();roundRect(ctx,x,y,w,h,16);ctx.clip();
   const im=await loadImg(data); if(im)drawCover(ctx,im,x,y,w,h); else {ctx.fillStyle='#1d3128';ctx.fillRect(x,y,w,h);}
-  const bh=big?58:44; ctx.fillStyle='rgba(20,31,25,.62)';ctx.fillRect(x,y+h-bh,w,bh);
   ctx.restore();
   ctx.strokeStyle='rgba(255,207,63,.85)';ctx.lineWidth=4;roundRect(ctx,x,y,w,h,16);ctx.stroke();
-  ctx.fillStyle='#ffcf3f';ctx.textAlign='left';ctx.font=`700 ${big?32:22}px ${RFONT}`;
-  ctx.fillText('｜'+label, x+16, y+h-(big?20:15));
+  // 說明字：白色粗體圓體 + 陰影（不加黑底）
+  ctx.save();
+  ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=`800 ${big?38:27}px ${RFONT}`;
+  ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=10;ctx.shadowOffsetY=2;
+  ctx.fillText(label, x+18, y+h-(big?26:19));
+  ctx.restore();
 }
 async function buildPostcard(){
   const c=document.getElementById('postcard');const ctx=c.getContext('2d');
@@ -1189,22 +1216,22 @@ async function buildPostcard(){
   const rest=items.filter(s=>s!==hero).slice(0,6);
   const fw=W-mx*2, fh=540, fyTop=316;
   await pcCell(ctx,S.album[hero[0]].data,mx,fyTop,fw,fh,hero[1],true);
-  const colW=(fw-gap)/2, rowH=288, gy=fyTop+fh+28;
+  const colW=(fw-gap)/2, rowH=264, gy=fyTop+fh+28;
   for(let i=0;i<rest.length;i++){const col=i%2,row=(i/2|0);
     const x=mx+col*(colW+gap), y=gy+row*(rowH+gap);
     await pcCell(ctx,S.album[rest[i][0]].data,x,y,colW,rowH,rest[i][1],false);
   }
-  // 頁尾
-  ctx.textAlign='center';ctx.fillStyle='#f4efe0';ctx.font='700 38px '+RFONT;
-  ctx.fillText('探險家　'+(S.codename||'平溪小旅人'),W/2,H-96);
-  ctx.fillStyle='rgba(244,239,224,.65)';ctx.font='500 24px '+FONT_SANS;
-  ctx.fillText('平溪囝仔認證 · '+dateStr()+' · 打卡 '+S.stamps.length+'/7',W/2,H-54);
+  // 頁尾（往下、放大）
+  ctx.textAlign='center';ctx.fillStyle='#f4efe0';ctx.font='800 48px '+RFONT;
+  ctx.fillText('探險家　'+(S.codename||'平溪小旅人'),W/2,1802);
+  ctx.fillStyle='rgba(244,239,224,.8)';ctx.font='600 34px '+FONT_SANS;
+  ctx.fillText('平溪囝仔認證 · '+dateStr()+' · 打卡 '+S.stamps.length+'/7',W/2,1856);
   ctx.textAlign='left';
 }
-function downloadPostcard(){
+async function downloadPostcard(){
   const c=document.getElementById('postcard');
-  try{const a=document.createElement('a');a.download='平溪明信片_'+(S.codename||'探險家')+'.jpg';
-    a.href=c.toDataURL('image/jpeg',0.92);a.click();}
+  try{const url=c.toDataURL('image/jpeg',0.92);
+    await saveImage(url,'平溪明信片_'+(S.codename||'探險家')+'.jpg');}
   catch(e){alert('儲存失敗，請改用長按圖片另存');}
 }
 
