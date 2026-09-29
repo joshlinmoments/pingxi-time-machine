@@ -11,14 +11,14 @@
 <meta property="og:title" content="平溪囝仔時光機 · PINGXI TIME MACHINE">
 <meta property="og:description" content="跟著平溪最強嚮導小葉，一站一站走進老街，用相機與貼紙，穿越回到平溪的那些年。">
 <meta property="og:url" content="https://joshlinmoments.github.io/pingxi-time-machine/">
-<meta property="og:image" content="https://joshlinmoments.github.io/pingxi-time-machine/slides/generated/scene1-station-v4_20260817_205840.png">
+<meta property="og:image" content="https://joshlinmoments.github.io/pingxi-time-machine/slides/generated/scene1-station-v4_20260817_205840.jpg">
 <meta property="og:image:width" content="1536">
 <meta property="og:image:height" content="1024">
 <meta property="og:image:alt" content="小葉在平溪火車站">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="平溪囝仔時光機 · PINGXI TIME MACHINE">
 <meta name="twitter:description" content="跟著平溪最強嚮導小葉，穿越回到平溪的那些年。">
-<meta name="twitter:image" content="https://joshlinmoments.github.io/pingxi-time-machine/slides/generated/scene1-station-v4_20260817_205840.png">
+<meta name="twitter:image" content="https://joshlinmoments.github.io/pingxi-time-machine/slides/generated/scene1-station-v4_20260817_205840.jpg">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
@@ -407,34 +407,34 @@ textarea{font-family:inherit}
    · 對照 Google Sheet「回到平溪那年・數位遊戲腳本 v3」逐段可改
    ========================================================= */
 
-const XIAOYE="slides/generated/xiaoye-avatar3_20260817_205712.png";
+const XIAOYE="slides/generated/xiaoye-avatar3_20260817_205712.jpg";
 /* Canvas 標題圓體字（回退黑體，不用明體） */
 const RFONT='"Yuanti TC","Yuanti SC","Hiragino Maru Gothic ProN","PingFang TC","Noto Sans TC",sans-serif';
 const SCENE_IMG={
-  1:"slides/generated/scene1-station-v4_20260817_205840.png",
-  2:"slides/generated/scene2b-store_20260817_210151.png",
-  3:"slides/generated/scene3b-dept_20260817_210243.png",
-  4:"slides/generated/scene4b-temple_20260817_210345.png",
-  5:"slides/generated/scene5b-seek_20260817_210449.png",
-  6:"slides/generated/scene6b-fabric_20260817_210543.png",
-  7:"slides/generated/scene7b-taro_20260817_210639.png",
+  1:"slides/generated/scene1-station-v4_20260817_205840.jpg",
+  2:"slides/generated/scene2b-store_20260817_210151.jpg",
+  3:"slides/generated/scene3b-dept_20260817_210243.jpg",
+  4:"slides/generated/scene4b-temple_20260817_210345.jpg",
+  5:"slides/generated/scene5b-seek_20260817_210449.jpg",
+  6:"slides/generated/scene6b-fabric_20260817_210543.jpg",
+  7:"slides/generated/scene7b-taro_20260817_210639.jpg",
 };
 
 /* ---------- 道具圖片 ---------- */
 const ITEM_IMG={
-  "鞭炮":"slides/stickers/item-firecracker.png",
-  "萬金油":"slides/stickers/item-tigerbalm.png",
-  "地瓜":"slides/stickers/item-sweetpotato.png",
-  "新衣":"slides/stickers/item-newclothes.png",
+  "鞭炮":"slides/stickers/item-firecracker.webp",
+  "萬金油":"slides/stickers/item-tigerbalm.webp",
+  "地瓜":"slides/stickers/item-sweetpotato.webp",
+  "新衣":"slides/stickers/item-newclothes.webp",
 };
 
 /* ---------- 圖鑑主檔 ---------- */
 const CHAR_IMG={
-  "芸芸":"slides/stickers/char-yunyun.png",
-  "阿任":"slides/stickers/char-aren.png",
-  "美雲阿姨":"slides/stickers/char-meiyun.png",
-  "大乾媽":"slides/stickers/char-godmother.png",
-  "芋圓奶奶":"slides/stickers/char-tarogranny.png",
+  "芸芸":"slides/stickers/char-yunyun.webp",
+  "阿任":"slides/stickers/char-aren.webp",
+  "美雲阿姨":"slides/stickers/char-meiyun.webp",
+  "大乾媽":"slides/stickers/char-godmother.webp",
+  "芋圓奶奶":"slides/stickers/char-tarogranny.webp",
 };
 const DEX={
   "小葉":{name:"小葉",img:XIAOYE,desc:"平溪最強嚮導，愛吹牛、超有人情味。"},
@@ -450,23 +450,23 @@ const DEX={
 };
 
 /* ---------- 貼紙（拍照後可自由擺放） ---------- */
-const XIAOYE_STICKER="slides/stickers/xiaoye-chibi.png";
+const XIAOYE_STICKER="slides/stickers/xiaoye-chibi.webp";
 const STICKERS={
-  planchette:{img:"slides/stickers/st-planchette.png", name:"碟仙"},
-  explosion:{img:"slides/stickers/st-explosion.png", name:"爆炸"},
-  firecracker:{img:"slides/stickers/item-firecracker.png", name:"鞭炮"},
-  flames:{img:"slides/stickers/st-flames.png", name:"火焰"},
-  sweetpotato:{img:"slides/stickers/item-sweetpotato.png", name:"烤地瓜"},
-  tarobowl:{img:"slides/stickers/st-tarobowl.png", name:"芋圓"},
-  fireworks:{img:"slides/stickers/st-fireworks.png", name:"煙火"},
-  lantern:{img:"slides/stickers/st-lantern.png", name:"天燈"},
-  campfire:{img:"slides/stickers/st-campfire.png", name:"營火"},
-  potatoskewer:{img:"slides/stickers/st-potatoskewer.png", name:"烤地瓜串"},
-  diexianpaper:{img:"slides/stickers/st-diexianpaper.png", name:"碟仙紙"},
+  planchette:{img:"slides/stickers/st-planchette.webp", name:"碟仙"},
+  explosion:{img:"slides/stickers/st-explosion.webp", name:"爆炸"},
+  firecracker:{img:"slides/stickers/item-firecracker.webp", name:"鞭炮"},
+  flames:{img:"slides/stickers/st-flames.webp", name:"火焰"},
+  sweetpotato:{img:"slides/stickers/item-sweetpotato.webp", name:"烤地瓜"},
+  tarobowl:{img:"slides/stickers/st-tarobowl.webp", name:"芋圓"},
+  fireworks:{img:"slides/stickers/st-fireworks.webp", name:"煙火"},
+  lantern:{img:"slides/stickers/st-lantern.webp", name:"天燈"},
+  campfire:{img:"slides/stickers/st-campfire.webp", name:"營火"},
+  potatoskewer:{img:"slides/stickers/st-potatoskewer.webp", name:"烤地瓜串"},
+  diexianpaper:{img:"slides/stickers/st-diexianpaper.webp", name:"碟仙紙"},
   xiaoye:{img:XIAOYE_STICKER, name:"小葉"},
-  yunyun:{img:"slides/stickers/char-yunyun.png", name:"芸芸"},
-  aren:{img:"slides/stickers/char-aren.png", name:"阿任"},
-  granny:{img:"slides/stickers/char-tarogranny.png", name:"芋圓奶奶"},
+  yunyun:{img:"slides/stickers/char-yunyun.webp", name:"芸芸"},
+  aren:{img:"slides/stickers/char-aren.webp", name:"阿任"},
+  granny:{img:"slides/stickers/char-tarogranny.webp", name:"芋圓奶奶"},
 };
 /* 每個拍照點提供的貼紙（呼應動作） */
 const STICKER_SETS={

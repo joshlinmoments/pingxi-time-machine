@@ -6,16 +6,19 @@ build_script_xlsx.py
 .playwright-mcp/
 .DS_Store
 
-# slides/generated：只保留遊戲實際使用的 8 張圖，其餘草稿不上傳
+# slides/generated：只保留遊戲實際使用的壓縮圖（JPEG），其餘草稿不上傳
 slides/generated/*
-!slides/generated/xiaoye-avatar3_20260817_205712.png
-!slides/generated/scene1-station-v4_20260817_205840.png
-!slides/generated/scene2b-store_20260817_210151.png
-!slides/generated/scene3b-dept_20260817_210243.png
-!slides/generated/scene4b-temple_20260817_210345.png
-!slides/generated/scene5b-seek_20260817_210449.png
-!slides/generated/scene6b-fabric_20260817_210543.png
-!slides/generated/scene7b-taro_20260817_210639.png
+!slides/generated/xiaoye-avatar3_20260817_205712.jpg
+!slides/generated/scene1-station-v4_20260817_205840.jpg
+!slides/generated/scene2b-store_20260817_210151.jpg
+!slides/generated/scene3b-dept_20260817_210243.jpg
+!slides/generated/scene4b-temple_20260817_210345.jpg
+!slides/generated/scene5b-seek_20260817_210449.jpg
+!slides/generated/scene6b-fabric_20260817_210543.jpg
+!slides/generated/scene7b-taro_20260817_210639.jpg
+
+# 貼紙原始 PNG 為素材來源，不部署（改用壓縮後的 .webp）
+slides/stickers/*.png
 
 # 立牌/建置腳本與預覽（非遊戲檔）
 *.jsx
