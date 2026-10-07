@@ -301,6 +301,12 @@ textarea{font-family:inherit}
 .ed-tray button img{max-width:100%;max-height:100%;object-fit:contain}
 .ed-actions{display:flex;gap:10px}
 .ed-actions .btn{margin-top:0}
+/* 語言切換（首頁） */
+.lang-pick{display:inline-flex;gap:6px;background:rgba(20,31,25,.06);border:1px solid var(--line);
+  border-radius:999px;padding:4px;margin:0 auto 14px}
+.lang-pick button{border:0;background:transparent;color:var(--pine-deep);font-weight:800;font-size:14px;
+  padding:7px 16px;border-radius:999px;cursor:pointer;font-family:var(--serif);letter-spacing:.3px}
+.lang-pick button.on{background:var(--pine-deep);color:var(--gold)}
 </style>
 </head>
 <body>
@@ -319,9 +325,13 @@ textarea{font-family:inherit}
       <img class="title-logo" src="slides/title-logo.png" alt="平溪囝仔時光機 PINGXI TIME MACHINE">
     </div>
     <div class="cover-body">
-      <span class="tag">平溪老街尋寶走讀</span>
-      <p>跟著平溪最強嚮導「小葉」，一站一站走進老街，<br>用五感、相機與趣味相框，穿越回到平溪的那些年。</p>
-      <button class="cta" onclick="go('intro')">開始走讀 →</button>
+      <div class="lang-pick" id="langPick">
+        <button id="langZh" onclick="setLang('zh')">🇹🇼 中文</button>
+        <button id="langEn" onclick="setLang('en')">🌏 English</button>
+      </div>
+      <span class="tag" id="coverTag">平溪老街尋寶走讀</span>
+      <p id="coverP">跟著平溪最強嚮導「小葉」，一站一站走進老街，<br>用五感、相機與趣味相框，穿越回到平溪的那些年。</p>
+      <button class="cta" id="coverCta" onclick="go('intro')">開始走讀 →</button>
     </div>
   </section>
 
@@ -340,28 +350,28 @@ textarea{font-family:inherit}
 
   <!-- 平溪寫真書 -->
   <section class="screen" id="finale">
-    <div class="fin-title">📖 我的平溪寫真書<small id="jbSub"></small></div>
+    <div class="fin-title"><span id="finTitle">📖 我的平溪寫真書</span><small id="jbSub"></small></div>
     <div class="book-wrap">
       <div class="book" id="book"></div>
-      <button class="book-nav prev" onclick="flipBook(-1)" aria-label="上一頁">‹</button>
-      <button class="book-nav next" onclick="flipBook(1)" aria-label="下一頁">›</button>
+      <button class="book-nav prev" onclick="flipBook(-1)" aria-label="prev">‹</button>
+      <button class="book-nav next" onclick="flipBook(1)" aria-label="next">›</button>
     </div>
     <div class="book-dots" id="bookDots"></div>
     <div class="book-dl">
-      <button class="btn sm" onclick="downloadPage()">📥 存這一頁到相簿</button>
-      <button class="btn sm ghost" onclick="downloadAllPages(this)">📥 存整本</button>
+      <button class="btn sm" id="dlPageBtn" onclick="downloadPage()">📥 存這一頁到相簿</button>
+      <button class="btn sm ghost" id="dlAllBtn" onclick="downloadAllPages(this)">📥 存整本</button>
     </div>
 
     <div class="postcard-wrap" style="margin-top:22px">
-      <h3>🖼️ 順手做了張明信片</h3>
-      <div class="sub">一路照片自動拼貼，可儲存分享</div>
+      <h3 id="postcardH">🖼️ 順手做了張明信片</h3>
+      <div class="sub" id="postcardSub">一路照片自動拼貼，可儲存分享</div>
       <canvas id="postcard" width="1000" height="1060"></canvas>
     </div>
 
     <div style="width:100%;margin-top:18px">
       <button class="btn" id="dlBtn" onclick="downloadPostcard()">📥 存明信片到相簿</button>
-      <button class="btn ghost" onclick="openBag()">🎒 背包 · 圖鑑 · 相簿</button>
-      <button class="btn ghost" onclick="restart()">重新開始</button>
+      <button class="btn ghost" id="bagBtnFin" onclick="openBag()">🎒 背包 · 圖鑑 · 相簿</button>
+      <button class="btn ghost" id="restartBtn" onclick="restart()">重新開始</button>
     </div>
   </section>
 
@@ -371,10 +381,10 @@ textarea{font-family:inherit}
     <div class="sheet">
       <h3 id="bagTitle">🎒 我的收藏</h3>
       <div class="bag-tabs">
-        <button class="on" data-tab="items" onclick="switchTab('items')">背包</button>
-        <button data-tab="stamp" onclick="switchTab('stamp')">打卡</button>
-        <button data-tab="dex" onclick="switchTab('dex')">圖鑑</button>
-        <button data-tab="album" onclick="switchTab('album')">相簿</button>
+        <button class="on" id="tabItems" data-tab="items" onclick="switchTab('items')">背包</button>
+        <button id="tabStamp" data-tab="stamp" onclick="switchTab('stamp')">打卡</button>
+        <button id="tabDex" data-tab="dex" onclick="switchTab('dex')">圖鑑</button>
+        <button id="tabAlbum" data-tab="album" onclick="switchTab('album')">相簿</button>
       </div>
       <div class="bag-pane on" id="pane-items"><div class="bp-grid" id="itemGrid"></div></div>
       <div class="bag-pane" id="pane-stamp"><div class="dex-grid" id="stampGrid"></div></div>
@@ -386,14 +396,14 @@ textarea{font-family:inherit}
   <!-- 貼紙編輯器 -->
   <div id="editor">
     <div class="ed-top">
-      <div class="ed-title">貼貼紙裝飾 🎨</div>
-      <div class="ed-hint">點下方貼紙加入 · 拖曳移動 · 右下角 ⤡ 縮放 · ✕ 刪除</div>
+      <div class="ed-title" id="edTitle">貼貼紙裝飾 🎨</div>
+      <div class="ed-hint" id="edHint">點下方貼紙加入 · 拖曳移動 · 右下角 ⤡ 縮放 · ✕ 刪除</div>
     </div>
     <div class="ed-canvas-wrap"><div class="ed-frame" id="edFrame"><img id="edPhoto" src="" alt=""></div></div>
     <div class="ed-tray" id="edTray"></div>
     <div class="ed-actions">
-      <button class="btn ghost sm" onclick="editorCancel()">用原圖</button>
-      <button class="btn sm" onclick="editorDone()">完成 ✓</button>
+      <button class="btn ghost sm" id="edCancel" onclick="editorCancel()">用原圖</button>
+      <button class="btn sm" id="edDone" onclick="editorDone()">完成 ✓</button>
     </div>
   </div>
 
@@ -437,16 +447,16 @@ const CHAR_IMG={
   "芋圓奶奶":"slides/stickers/char-tarogranny.webp",
 };
 const DEX={
-  "小葉":{name:"小葉",img:XIAOYE,desc:"平溪最強嚮導，愛吹牛、超有人情味。"},
-  "芸芸":{name:"芸芸",img:CHAR_IMG["芸芸"],desc:"小葉的青梅竹馬，愛歷史、鬼靈精怪的女孩。"},
-  "阿任":{name:"阿任",img:CHAR_IMG["阿任"],desc:"小葉的死黨，調皮搗蛋、鬼點子最多的男孩。"},
-  "大乾媽":{name:"大乾媽",img:CHAR_IMG["大乾媽"],desc:"觀音媽，全平溪人的大乾媽，聚落的起點與守護。"},
-  "美雲阿姨":{name:"美雲阿姨",img:CHAR_IMG["美雲阿姨"],desc:"美雲布藝的老闆，一手好裁縫，過年新衣都靠她。"},
-  "芋圓奶奶":{name:"芋圓奶奶",img:CHAR_IMG["芋圓奶奶"],desc:"平溪芋圓老店的奶奶，笑口常開，最愛看囝仔穿新衫。"},
-  "鞭炮":{name:"鞭炮",img:ITEM_IMG["鞭炮"],desc:"成盈利老闆神秘塞來的一大袋——「不要問，拿著就對了！」"},
-  "萬金油":{name:"萬金油",img:ITEM_IMG["萬金油"],desc:"新建成百貨的百寶油，山城人家家必備，哪裡不舒服都能擦。"},
-  "地瓜":{name:"地瓜",img:ITEM_IMG["地瓜"],desc:"熱騰騰、香噴噴的現烤地瓜，冷天裡最療癒（來源嘛…嘿嘿）。"},
-  "新衣":{name:"新衣",img:ITEM_IMG["新衣"],desc:"剪裁合身的新衣裳，穿上它，年味就來了。"},
+  "小葉":{name:"小葉",nameEn:"Toni",img:XIAOYE,desc:"平溪最強嚮導，愛吹牛、超有人情味。",descEn:"Pingxi's top guide — loves to brag, big on warmth and heart."},
+  "芸芸":{name:"芸芸",nameEn:"Yunyun",img:CHAR_IMG["芸芸"],desc:"小葉的青梅竹馬，愛歷史、鬼靈精怪的女孩。",descEn:"Toni's childhood sweetheart; a clever, mischievous girl who loves history."},
+  "阿任":{name:"阿任",nameEn:"Aren",img:CHAR_IMG["阿任"],desc:"小葉的死黨，調皮搗蛋、鬼點子最多的男孩。",descEn:"Toni's best buddy; the naughtiest boy with the most pranks up his sleeve."},
+  "大乾媽":{name:"大乾媽",nameEn:"Big Godmother",img:CHAR_IMG["大乾媽"],desc:"觀音媽，全平溪人的大乾媽，聚落的起點與守護。",descEn:"Guanyin — godmother to all of Pingxi, the origin and guardian of the settlement."},
+  "美雲阿姨":{name:"美雲阿姨",nameEn:"Auntie Meiyun",img:CHAR_IMG["美雲阿姨"],desc:"美雲布藝的老闆，一手好裁縫，過年新衣都靠她。",descEn:"Owner of Meiyun Fabric; a master tailor — everyone's New Year clothes came from her."},
+  "芋圓奶奶":{name:"芋圓奶奶",nameEn:"Taro-ball Granny",img:CHAR_IMG["芋圓奶奶"],desc:"平溪芋圓老店的奶奶，笑口常開，最愛看囝仔穿新衫。",descEn:"Granny of the old Pingxi taro-ball shop; always smiling, loves seeing kids in new clothes."},
+  "鞭炮":{name:"鞭炮",nameEn:"Firecrackers",img:ITEM_IMG["鞭炮"],desc:"成盈利老闆神秘塞來的一大袋——「不要問，拿著就對了！」",descEn:"A big bag the Chengyingli owner secretly slipped you — “Don't ask, just take them!”"},
+  "萬金油":{name:"萬金油",nameEn:"Tiger Balm",img:ITEM_IMG["萬金油"],desc:"新建成百貨的百寶油，山城人家家必備，哪裡不舒服都能擦。",descEn:"The cure-all balm from Xinjiancheng — a must in every mountain household."},
+  "地瓜":{name:"地瓜",nameEn:"Sweet Potato",img:ITEM_IMG["地瓜"],desc:"熱騰騰、香噴噴的現烤地瓜，冷天裡最療癒（來源嘛…嘿嘿）。",descEn:"A piping-hot, fragrant roasted sweet potato — the ultimate comfort on a cold day (source… heh heh)."},
+  "新衣":{name:"新衣",nameEn:"New Clothes",img:ITEM_IMG["新衣"],desc:"剪裁合身的新衣裳，穿上它，年味就來了。",descEn:"A well-tailored new outfit — put it on and the New Year spirit arrives."},
 };
 
 /* ---------- 貼紙（拍照後可自由擺放） ---------- */
@@ -481,128 +491,198 @@ function stickersFor(slot){return STICKER_SETS[slot]||STICKER_SETS._default;}
 
 /* ---------- 關卡（逐段 beats） ---------- */
 const STAGES=[
- {n:1, zh:"啟程・平溪車站", en:"Departure · Pingxi Station", place:"平溪火車站", map:"平溪火車站",
+ {n:1, zh:"啟程・平溪車站", en:"Departure · Pingxi Station", place:"平溪火車站", placeEn:"Pingxi Railway Station", map:"平溪火車站",
   story:"鐵道山城、天燈故鄉，旅程從這座月台開始。",
+  storyEn:"A railway mountain town, home of the sky lanterns — the journey begins on this platform.",
   hint:"牆上開滿花的那家「24 小時柑仔店」，就在地圖 2 號！",
+  hintEn:"That “24-hour corner store” with flowers all over its wall — it's #2 on the map!",
   beats:[
-    {t:"ye", x:"哈囉！我是小葉，平溪土生土長、認證的最強嚮導！這條老街的每塊石頭、每間店，我閉著眼睛都認得。"},
-    {t:"ye", x:"平溪啊，是鐵道穿過老街的山城，也是天燈的故鄉——別急，好戲在後頭，跟我走就對了！"},
-    {t:"ye", x:"先教你三招 👉 ① 一路上會收集『平溪囝仔圖鑑』和道具；② 看到喜歡的畫面就盡量拍、別客氣——我會幫你變成專屬的『小小遊記』；③ 想隨時翻圖鑑、相簿、道具，點右上角的 🎒 就好！"},
+    {t:"ye", x:"哈囉！我是小葉，平溪土生土長、認證的最強嚮導！這條老街的每塊石頭、每間店，我閉著眼睛都認得。",
+      en:{x:"Hi! I'm Toni — born and raised in Pingxi, your certified top guide! Every stone and every shop on this old street, I know with my eyes closed."}},
+    {t:"ye", x:"平溪啊，是鐵道穿過老街的山城，也是天燈的故鄉——別急，好戲在後頭，跟我走就對了！",
+      en:{x:"Pingxi is a mountain town where the railway runs right through the old street — and the hometown of the sky lanterns. Hang tight, the best is yet to come. Just follow me!"}},
+    {t:"ye", x:"先教你三招 👉 ① 一路上會收集『平溪囝仔圖鑑』和道具；② 看到喜歡的畫面就盡量拍、別客氣——我會幫你變成專屬的『小小遊記』；③ 想隨時翻圖鑑、相簿、道具，點右上角的 🎒 就好！",
+      en:{x:"Three quick tips 👉 ① Along the way you'll collect the “Pingxi Kids Dex” and items; ② Snap as many photos as you like — don't be shy; I'll turn them into your own “Photo Diary”; ③ Tap the 🎒 at the top-right anytime for your dex, album and items!"}},
     {t:"scene"},
     {t:"input", key:"codename", label:"先報上名來！這趟平溪冒險，你想要我怎麼稱呼你？", ph:"例如：時光小旅人",
-      warm:"太好了，{name}！這名字我喜歡，走跳平溪就靠你了！"},
+      warm:"太好了，{name}！這名字我喜歡，走跳平溪就靠你了！",
+      en:{label:"First, your name! What should I call you on this Pingxi adventure?", ph:"e.g. Time Traveler",
+      warm:"Love it, {name}! Great name — Pingxi's all yours now!"}},
     {t:"open", key:"j1", prompt:"第一次、或又一次踏上平溪，你現在的心情是？寫一句話給今天的自己。",
-      warm:"記下來了，這會是你遊記的第一頁 ✨"},
-    {t:"photo", slot:"1", label:"平溪火車站", prompt:"站在月台或鐵軌旁拍一張——這可是全台灣少數火車貼著老街開過的地方喔。"},
+      warm:"記下來了，這會是你遊記的第一頁 ✨",
+      en:{prompt:"First time in Pingxi, or back again — how do you feel right now? Write a line to your today-self.",
+      warm:"Noted — this will be the first page of your diary ✨"}},
+    {t:"photo", slot:"1", label:"平溪火車站", prompt:"站在月台或鐵軌旁拍一張——這可是全台灣少數火車貼著老街開過的地方喔。",
+      en:{prompt:"Snap one by the platform or the tracks — this is one of the few places in Taiwan where the train rolls right past the old street."}},
     {t:"dex", who:"小葉"},
     {t:"stamp"},
-    {t:"ye", x:"走吧！先帶你去我最常光顧的那間——牆上開滿花的「24 小時柑仔店」！"},
+    {t:"ye", x:"走吧！先帶你去我最常光顧的那間——牆上開滿花的「24 小時柑仔店」！",
+      en:{x:"Let's go! First I'll take you to my favorite spot — the “24-hour corner store” with flowers all over its wall!"}},
   ]},
 
- {n:2, zh:"24 小時柑仔店", en:"The 24hr Store · 成盈利商店", place:"成盈利商店", map:"平溪 成盈利商店",
+ {n:2, zh:"24 小時柑仔店", en:"The 24hr Store · Chengyingli", place:"成盈利商店", placeEn:"Chengyingli Store", map:"平溪 成盈利商店",
   story:"敲敲門就開門的柑仔店，是老平溪的 24 小時溫暖。",
+  storyEn:"A corner store that opens whenever you knock — old Pingxi's round-the-clock warmth.",
   hint:"平溪人的百貨天堂「新建成百貨行」，地圖 3 號！",
+  hintEn:"Pingxi folks' department-store heaven, “Xinjiancheng”, map #3!",
   beats:[
     {t:"input", key:"store2", label:"到囉！看看招牌，把這家店的名字打給我（三個字）。", ph:"店名",
-      accept:["成盈利"], confirmed:true, tip:"招牌上金金亮亮那三個字", warm:"沒錯，就是「成盈利」！這間柑仔店，我從小逛到大，超有感情 😎"},
-    {t:"ye", x:"你別看它小，以前庄裡的人半夜嘴饞、缺瓶醬油，敲敲門阿伯就開門——所以我們都笑說它是「平溪的 24 小時便利商店」！"},
+      accept:["成盈利","chengyingli","cheng ying li"], confirmed:true, tip:"招牌上金金亮亮那三個字", warm:"沒錯，就是「成盈利」！這間柑仔店，我從小逛到大，超有感情 😎",
+      en:{label:"Here we are! Look at the sign and type the shop's name — the 3 Chinese characters, or its romanization “Chengyingli”.", ph:"shop name",
+      tip:"the three shiny golden characters on the sign", warm:"That's it — “Chengyingli”! I've shopped here since I was a kid, so many memories 😎"}},
+    {t:"ye", x:"你別看它小，以前庄裡的人半夜嘴饞、缺瓶醬油，敲敲門阿伯就開門——所以我們都笑說它是「平溪的 24 小時便利商店」！",
+      en:{x:"Don't let its size fool you — back in the day, when villagers got a midnight craving or ran out of soy sauce, they'd knock and the owner would open up. That's why we call it “Pingxi's 24-hour convenience store”!"}},
     {t:"scene"},
     {t:"open", key:"j2", prompt:"問問老闆、或自己想想看：一家柑仔店能開上幾十年，靠的是什麼？把你聽到或想到的寫下來。",
-      warm:"嗯，這答案很有你的味道，收進遊記！"},
-    {t:"get", item:"鞭炮", x:"老闆突然塞給你「一大袋鞭炮」🧨！你一臉問號…小葉神秘一笑：「不要問，拿著就對了！」"},
+      warm:"嗯，這答案很有你的味道，收進遊記！",
+      en:{prompt:"Ask the owner, or just think: what keeps a corner store running for decades? Write down what you hear or imagine.",
+      warm:"Hmm, that answer is so you — into the diary it goes!"}},
+    {t:"get", item:"鞭炮", x:"老闆突然塞給你「一大袋鞭炮」🧨！你一臉問號…小葉神秘一笑：「不要問，拿著就對了！」",
+      en:{x:"The owner suddenly hands you a big bag of firecrackers 🧨! You look puzzled… Toni grins: “Don't ask, just take them!”"}},
     {t:"dex", who:"鞭炮"},
-    {t:"ye", x:"等等帶你去見我乾媽，她超厲害！平溪這些孩子啊，都是她的乾兒子乾女兒。"},
-    {t:"photo", slot:"2", label:"成盈利商店", prompt:"這面開滿花的牆超好拍，來一張吧！"},
+    {t:"ye", x:"等等帶你去見我乾媽，她超厲害！平溪這些孩子啊，都是她的乾兒子乾女兒。",
+      en:{x:"Next I'll take you to meet my godmother — she's amazing! All the kids in Pingxi are her godsons and goddaughters."}},
+    {t:"photo", slot:"2", label:"成盈利商店", prompt:"這面開滿花的牆超好拍，來一張吧！",
+      en:{prompt:"This wall full of flowers is super photogenic — take one!"}},
     {t:"stamp"},
   ]},
 
- {n:3, zh:"平溪的百貨公司", en:"Department Store · 新建成百貨行", place:"新建成百貨行", map:"平溪 新建成百貨行",
+ {n:3, zh:"平溪的百貨公司", en:"Department Store · Xinjiancheng", place:"新建成百貨行", placeEn:"Xinjiancheng Department Store", map:"平溪 新建成百貨行",
   story:"山城裡什麼都有的百貨行，是平溪人的小天堂。",
+  storyEn:"A mountain-town department store that had everything — a little paradise for Pingxi folks.",
   hint:"有觀音、有香火的「觀音巖」，地圖 4 號那棟金碧輝煌建築的 2 樓！",
+  hintEn:"“Guanyin Rock”, with its incense and the Goddess — on the 2nd floor of that magnificent building at map #4!",
   beats:[
     {t:"input", key:"store3", label:"看到那棟氣派的建築了嗎？把店名打給我（三個字）。", ph:"店名",
-      accept:["新建成"], confirmed:true, tip:"門面上的三個大字", warm:"對！「新建成」，平溪老街的百貨天花板 💅"},
-    {t:"ye", x:"這是我們平溪的「百貨公司」！化妝品、衣服、制服、藥品…你想得到的通通有。以前山城交通不便，這間店根本是平溪人的小型天堂。"},
+      accept:["新建成","xinjiancheng","xin jian cheng"], confirmed:true, tip:"門面上的三個大字", warm:"對！「新建成」，平溪老街的百貨天花板 💅",
+      en:{label:"See that grand building? Type its name — the 3 Chinese characters, or its romanization “Xinjiancheng”.", ph:"shop name",
+      tip:"the three big characters on the facade", warm:"Yes! “Xinjiancheng” — the pinnacle of Pingxi Old Street shopping 💅"}},
+    {t:"ye", x:"這是我們平溪的「百貨公司」！化妝品、衣服、制服、藥品…你想得到的通通有。以前山城交通不便，這間店根本是平溪人的小型天堂。",
+      en:{x:"This is our Pingxi “department store”! Cosmetics, clothes, uniforms, medicine… everything you can think of. Back when the mountains were hard to reach, this shop was a little paradise."}},
     {t:"scene"},
-    {t:"get", item:"萬金油", x:"老闆遞來一瓶「虎標萬金油」💨！你又一臉疑惑…小葉再次神秘一笑：「不要問，拿著就對了！」"},
+    {t:"get", item:"萬金油", x:"老闆遞來一瓶「虎標萬金油」💨！你又一臉疑惑…小葉再次神秘一笑：「不要問，拿著就對了！」",
+      en:{x:"The owner hands you a tin of Tiger Balm 💨! You look puzzled again… Toni grins once more: “Don't ask, just take it!”"}},
     {t:"dex", who:"萬金油"},
-    {t:"photo", slot:"3", label:"新建成百貨行", prompt:"老派的百貨行超有味道，拍一張留念吧！"},
+    {t:"photo", slot:"3", label:"新建成百貨行", prompt:"老派的百貨行超有味道，拍一張留念吧！",
+      en:{prompt:"This old-school department store has such character — snap one for the memory!"}},
     {t:"stamp"},
   ]},
 
- {n:4, zh:"乾媽的家", en:"Godmother's Home · 觀音巖", place:"觀音巖", map:"平溪 觀音巖",
+ {n:4, zh:"乾媽的家", en:"Godmother's Home · Guanyin Rock", place:"觀音巖", placeEn:"Guanyin Rock", map:"平溪 觀音巖",
   story:"觀音媽是全平溪人的大乾媽，護佑著每個囝仔。",
+  storyEn:"Guanyin is godmother to all of Pingxi, watching over every child.",
   hint:"跟我上後山，玩我們囝仔時候最愛的躲貓貓！",
+  hintEn:"Follow me up the back hill for our childhood favorite — hide and seek!",
   beats:[
     {t:"input", key:"couplet",
       label:"到乾媽家了！抬頭看門口那副對聯，把缺的兩個字合起來填給我——\n上聯：觀望平溪勝地靈光「◯」\n下聯：音傳蓮座楊柳甘露「◯」",
-      ph:"兩個字", accept:["新淨"], confirmed:true, tip:"一句一個字，合起來是心境的祝福",
-      warm:"答對了！「新淨」——新氣象、心清淨，觀音媽的祝福 🙏"},
-    {t:"ye", x:"觀音媽，就是我們全平溪人的「大乾媽」。當年就是因為有這座觀音巖，人才慢慢聚過來、形成聚落。所以每一個平溪囝仔，都是觀音媽的孩子啦！"},
+      ph:"兩個字", accept:["新淨","xinjing","xin jing"], confirmed:true, tip:"一句一個字，合起來是心境的祝福",
+      warm:"答對了！「新淨」——新氣象、心清淨，觀音媽的祝福 🙏",
+      en:{label:"We're at Godmother's home! Look up at the couplet by the door and fill in the two missing characters—\nUpper line: 觀望平溪勝地靈光「◯」\nLower line: 音傳蓮座楊柳甘露「◯」\n(Type the 2 Chinese characters, or romanization “xinjing”.)",
+      ph:"two characters", tip:"one character per line; together they're a blessing of the heart",
+      warm:"Correct! “新淨” (xīn jìng) — a fresh start and a pure heart, Guanyin's blessing 🙏"}},
+    {t:"ye", x:"觀音媽，就是我們全平溪人的「大乾媽」。當年就是因為有這座觀音巖，人才慢慢聚過來、形成聚落。所以每一個平溪囝仔，都是觀音媽的孩子啦！",
+      en:{x:"Guanyin is the “big godmother” of everyone in Pingxi. It was this Guanyin Rock that first drew people here and formed the settlement — so every Pingxi kid is Guanyin's child!"}},
     {t:"scene"},
     {t:"open", key:"j4", prompt:"在觀音媽面前，靜靜許一個願望吧。（只有你和觀音媽知道，我不偷看）",
-      warm:"願望收下了，也悄悄記進你的遊記 🌙"},
+      warm:"願望收下了，也悄悄記進你的遊記 🌙",
+      en:{prompt:"Quietly make a wish before Guanyin. (Only you and Guanyin will know — I won't peek.)",
+      warm:"Wish received, and tucked quietly into your diary 🌙"}},
     {t:"dex", who:"大乾媽"},
-    {t:"photo", slot:"4", label:"觀音巖", prompt:"跟乾媽合張影，保佑你一路順利！"},
+    {t:"photo", slot:"4", label:"觀音巖", prompt:"跟乾媽合張影，保佑你一路順利！",
+      en:{prompt:"Take a photo with Godmother — for a safe journey ahead!"}},
     {t:"stamp"},
   ]},
 
- {n:5, zh:"後山躲貓貓", en:"Hide & Seek · 平安鐘", place:"觀音巖後山・平安鐘", map:"平溪 觀音巖 平安鐘",
+ {n:5, zh:"後山躲貓貓", en:"Hide & Seek · Peace Bell", place:"觀音巖後山・平安鐘", placeEn:"Back Hill · Peace Bell", map:"平溪 觀音巖 平安鐘",
   story:"八仙洞、防空洞、平安鐘——後山藏著小葉最瘋的童年。",
+  storyEn:"Baxian Cave, the air-raid tunnels, the Peace Bell — the back hill holds Toni's wildest childhood.",
   hint:"太陽下山啦！去找美雲阿姨做件新衣——門牌 40 號，地圖 6 號！",
+  hintEn:"The sun's setting! Go see Auntie Meiyun for a new outfit — door #40, map #6!",
   beats:[
-    {t:"ye", x:"這座山，就是我們囝仔時候玩躲貓貓的秘密基地！來，跟我走一圈，聽我講我跟芸芸、阿任的故事——一邊還要拍幾張穿越照，讓你親自跳進我們的童年！"},
+    {t:"ye", x:"這座山，就是我們囝仔時候玩躲貓貓的秘密基地！來，跟我走一圈，聽我講我跟芸芸、阿任的故事——一邊還要拍幾張穿越照，讓你親自跳進我們的童年！",
+      en:{x:"This hill was our secret base for hide-and-seek as kids! Come, walk it with me and hear my stories with Yunyun and Aren — and snap a few time-travel photos to jump right into our childhood!"}},
     {t:"scene"},
-    {t:"ye", x:"先說芸芸。她最愛躲在廟旁邊的「八仙洞」——那其實是日據時期的防空洞，超有歷史！我們小時候最愛蹲在洞裡玩碟仙，嚇得半死又愛玩，哈哈！"},
-    {t:"photo", slot:"5a", label:"八仙洞・玩碟仙", prompt:"到八仙洞，用趣味相框拍一張「你在洞裡玩碟仙」的穿越畫面！"},
+    {t:"ye", x:"先說芸芸。她最愛躲在廟旁邊的「八仙洞」——那其實是日據時期的防空洞，超有歷史！我們小時候最愛蹲在洞裡玩碟仙，嚇得半死又愛玩，哈哈！",
+      en:{x:"First, Yunyun. She loved hiding in “Baxian Cave” by the temple — actually a Japanese-era air-raid shelter, so much history! We'd crouch inside playing the spirit-dish game, scared silly but loving it, haha!"}},
+    {t:"photo", slot:"5a", label:"八仙洞・玩碟仙", prompt:"到八仙洞，用趣味相框拍一張「你在洞裡玩碟仙」的穿越畫面！",
+      en:{prompt:"At Baxian Cave, use the fun frame to snap a “you playing the spirit game in the cave” time-travel shot!"}},
     {t:"dex", who:"芸芸"},
-    {t:"ye", x:"接著是阿任，那皮蛋最愛躲在「一連好幾個相通的防空洞」裡。你知道嗎？逢年過節，石底村和平溪村的囝仔，就在這裡打一場『鞭炮大戰』！"},
-    {t:"use", need:"鞭炮", label:"朝防空洞丟鞭炮 🧨", x:"碰——！💥 一陣煙霧，阿任灰頭土臉、哈哈大笑地舉手投降跑出來！"},
-    {t:"photo", slot:"5b", label:"防空洞・鞭炮大戰", prompt:"用趣味相框，拍一張「你在防空洞丟鞭炮」的痛快畫面！"},
+    {t:"ye", x:"接著是阿任，那皮蛋最愛躲在「一連好幾個相通的防空洞」裡。你知道嗎？逢年過節，石底村和平溪村的囝仔，就在這裡打一場『鞭炮大戰』！",
+      en:{x:"Next, Aren — that rascal loved hiding in a string of connected air-raid tunnels. You know what? Every New Year, the kids of Shidi village and Pingxi village had a “firecracker battle” right here!"}},
+    {t:"use", need:"鞭炮", label:"朝防空洞丟鞭炮 🧨", x:"碰——！💥 一陣煙霧，阿任灰頭土臉、哈哈大笑地舉手投降跑出來！",
+      en:{label:"Throw firecrackers into the tunnel 🧨", x:"BANG—! 💥 Through the smoke, Aren stumbles out covered in soot, laughing and throwing up his hands in surrender!"}},
+    {t:"photo", slot:"5b", label:"防空洞・鞭炮大戰", prompt:"用趣味相框，拍一張「你在防空洞丟鞭炮」的痛快畫面！",
+      en:{prompt:"Use the fun frame for a thrilling “you throwing firecrackers in the tunnel” shot!"}},
     {t:"dex", who:"阿任"},
-    {t:"use", need:"萬金油", label:"拿出萬金油互相擦一擦 💨", x:"一陣激戰下來，大家東痛西痛。抹上萬金油，呼～舒服多了！這味道，就是平溪的童年味 😌"},
-    {t:"ye", x:"打完鬧完，長輩在山下一聲吆喝，我們就乖乖跑去乾媽面前領壓歲錢，握握手、拱拱手，新年快樂！——欸，那我躲哪？我躲在山頂『平安鐘』啦！"},
-    {t:"ye", x:"平安鐘在山頂，聽得見鐘聲，是全平溪最高、最靜的地方——也是以前我們烘窯烤地瓜的秘密基地！"},
-    {t:"photo", slot:"5c", label:"平安鐘・烤地瓜", prompt:"用趣味相框，拍一張「你在平安鐘烤地瓜」的畫面！"},
-    {t:"get", item:"地瓜", x:"烤好啦！小葉遞給你一顆「香噴噴的現烤地瓜」🍠！（至於地瓜哪來的…嘿嘿，這就不好說了！）"},
+    {t:"use", need:"萬金油", label:"拿出萬金油互相擦一擦 💨", x:"一陣激戰下來，大家東痛西痛。抹上萬金油，呼～舒服多了！這味道，就是平溪的童年味 😌",
+      en:{label:"Rub on some Tiger Balm 💨", x:"After that fierce battle, everyone's aching all over. A dab of Tiger Balm — ahh, much better! That scent is the smell of a Pingxi childhood 😌"}},
+    {t:"ye", x:"打完鬧完，長輩在山下一聲吆喝，我們就乖乖跑去乾媽面前領壓歲錢，握握手、拱拱手，新年快樂！——欸，那我躲哪？我躲在山頂『平安鐘』啦！",
+      en:{x:"After all the fun, the grown-ups would holler from the foot of the hill and we'd scurry to Godmother for our New Year's money — a handshake, a bow, Happy New Year! — Oh, where did I hide? Up at the hilltop “Peace Bell”!"}},
+    {t:"ye", x:"平安鐘在山頂，聽得見鐘聲，是全平溪最高、最靜的地方——也是以前我們烘窯烤地瓜的秘密基地！",
+      en:{x:"The Peace Bell sits on the summit where you can hear the bell ring — the highest, quietest spot in all Pingxi — and our secret kiln for roasting sweet potatoes!"}},
+    {t:"photo", slot:"5c", label:"平安鐘・烤地瓜", prompt:"用趣味相框，拍一張「你在平安鐘烤地瓜」的畫面！",
+      en:{prompt:"Use the fun frame for a “you roasting sweet potatoes at the Peace Bell” shot!"}},
+    {t:"get", item:"地瓜", x:"烤好啦！小葉遞給你一顆「香噴噴的現烤地瓜」🍠！（至於地瓜哪來的…嘿嘿，這就不好說了！）",
+      en:{x:"Done! Toni hands you a piping-hot roasted sweet potato 🍠! (As for where it came from… heh, best not to ask!)"}},
     {t:"dex", who:"地瓜"},
-    {t:"use", need:"地瓜", label:"趁熱吃掉烤地瓜 🍠", x:"趁熱咬一大口——燙！但又香又綿，這就是山頂上的幸福味 😋"},
+    {t:"use", need:"地瓜", label:"趁熱吃掉烤地瓜 🍠", x:"趁熱咬一大口——燙！但又香又綿，這就是山頂上的幸福味 😋",
+      en:{label:"Eat the sweet potato while it's hot 🍠", x:"A big bite while it's hot — ouch! But sweet and fluffy. This is the taste of happiness on the hilltop 😋"}},
     {t:"stamp"},
   ]},
 
- {n:6, zh:"做新衫", en:"New Year Clothes · 美雲布藝", place:"美雲布藝工作室", map:"平溪老街 美雲布藝工作室",
+ {n:6, zh:"做新衫", en:"New Year Clothes · Meiyun Fabric", place:"美雲布藝工作室", placeEn:"Meiyun Fabric Studio", map:"平溪老街 美雲布藝工作室",
   story:"過年做新衣，是老平溪最鄭重的儀式感。",
+  storyEn:"Tailoring New Year clothes — old Pingxi's most heartfelt ritual.",
   hint:"最後一站！平溪芋圓，地圖 7 號——小葉請客！",
+  hintEn:"Last stop! Pingxi Taro Balls, map #7 — Toni's treat!",
   beats:[
     {t:"input", key:"door6", label:"到啦！看看門牌，把號碼打給我（兩位數）。", ph:"門牌號碼",
-      accept:["40"], confirmed:true, tip:"就在門口的門牌上", warm:"沒錯，40 號！記性不錯嘛 👍"},
-    {t:"ye", x:"以前一到過年，平溪每個人都要來光顧這家店，你知道為什麼嗎？來，你自己問問老闆。"},
+      accept:["40"], confirmed:true, tip:"就在門口的門牌上", warm:"沒錯，40 號！記性不錯嘛 👍",
+      en:{label:"Here we are! Check the door plate and type the number (two digits).", ph:"door number",
+      tip:"it's right on the door plate", warm:"That's right — No. 40! Good memory 👍"}},
+    {t:"ye", x:"以前一到過年，平溪每個人都要來光顧這家店，你知道為什麼嗎？來，你自己問問老闆。",
+      en:{x:"Every New Year, everyone in Pingxi used to come to this shop. Know why? Here, ask the owner yourself."}},
     {t:"scene"},
     {t:"open", key:"j6", prompt:"問問老闆：為什麼以前過年大家都來這裡做新衣？把你聽到的故事寫下來。",
-      warm:"好故事，收進你的遊記 🧵"},
-    {t:"get", item:"新衣", x:"量身、選布、裁製…換上一身新衣服，整個人都精神了！✨"},
+      warm:"好故事，收進你的遊記 🧵",
+      en:{prompt:"Ask the owner: why did everyone come here to make New Year clothes? Write down the story you hear.",
+      warm:"Lovely story — into your diary 🧵"}},
+    {t:"get", item:"新衣", x:"量身、選布、裁製…換上一身新衣服，整個人都精神了！✨",
+      en:{x:"Measured, fabric chosen, tailored… you slip into a brand-new outfit and feel sharp all over! ✨"}},
     {t:"dex", who:"新衣"},
     {t:"dex", who:"美雲阿姨"},
-    {t:"photo", slot:"6", label:"美雲布藝・新衣", prompt:"穿新衣，來張帥氣打卡照吧！"},
+    {t:"photo", slot:"6", label:"美雲布藝・新衣", prompt:"穿新衣，來張帥氣打卡照吧！",
+      en:{prompt:"In your new clothes, strike a cool check-in pose!"}},
     {t:"stamp"},
-    {t:"ye", x:"恭喜你！大部分關卡都破了！最後一站走到 7 號平溪芋圓——讓我小葉本人，請你吃一碗道地芋圓，順便講講我那段荒誕不羈的平溪童年 😎"},
+    {t:"ye", x:"恭喜你！大部分關卡都破了！最後一站走到 7 號平溪芋圓——讓我小葉本人，請你吃一碗道地芋圓，順便講講我那段荒誕不羈的平溪童年 😎",
+      en:{x:"Congrats! You've cleared almost every stage! Last stop: walk to #7, Pingxi Taro Balls — let me treat you to a bowl of authentic taro balls and tell you about my wild, carefree Pingxi childhood 😎"}},
   ]},
 
- {n:7, zh:"小葉請客吃芋圓", en:"Finale · Pingxi Taro Balls", place:"平溪芋圓", map:"平溪芋圓",
+ {n:7, zh:"小葉請客吃芋圓", en:"Finale · Pingxi Taro Balls", place:"平溪芋圓", placeEn:"Pingxi Taro Balls", map:"平溪芋圓",
   story:"一碗芋圓，甜甜地收束這趟回到平溪的旅程。",
+  storyEn:"A bowl of taro balls to sweetly wrap up this journey back to Pingxi.",
   final:true,
   beats:[
-    {t:"ye", x:"呼～這一圈走下來，你已經不只是遊客，是我認證的「平溪囝仔」了！從火車站、柑仔店、百貨行、乾媽家，到後山那場鞭炮大戰…謝謝你陪我回到平溪的那些年。"},
+    {t:"ye", x:"呼～這一圈走下來，你已經不只是遊客，是我認證的「平溪囝仔」了！從火車站、柑仔店、百貨行、乾媽家，到後山那場鞭炮大戰…謝謝你陪我回到平溪的那些年。",
+      en:{x:"Phew~ after this whole loop, you're not just a tourist anymore — you're a certified “Pingxi Kid”! From the station, the corner store, the department store, Godmother's home, to that firecracker battle on the back hill… thank you for coming back to old Pingxi with me."}},
     {t:"scene"},
-    {t:"ye", x:"來清點這一路的回憶——鞭炮大戰、萬金油、山頂烤地瓜、還有一身新衣裳，以及你收服的「平溪囝仔圖鑑」：小葉、芸芸、阿任、大乾媽…全員到齊！（點右上角 🎒 隨時看）"},
-    {t:"ye", x:"欸，賣芋圓的奶奶就在那！來，穿著你這身新衣，去跟奶奶炫耀一下——她最愛看囝仔穿新衫了！"},
-    {t:"use", need:"新衣", label:"向芋圓奶奶炫耀新衣 👕✨", x:"奶奶笑得合不攏嘴：「哎唷～這囝仔穿新衫真緣投！來，芋圓多加你一勺！」"},
+    {t:"ye", x:"來清點這一路的回憶——鞭炮大戰、萬金油、山頂烤地瓜、還有一身新衣裳，以及你收服的「平溪囝仔圖鑑」：小葉、芸芸、阿任、大乾媽…全員到齊！（點右上角 🎒 隨時看）",
+      en:{x:"Let's count up the memories — the firecracker battle, the Tiger Balm, roasting sweet potatoes on the summit, your new outfit, and the “Pingxi Kids Dex” you collected: Toni, Yunyun, Aren, Big Godmother… all here! (Tap 🎒 top-right anytime.)"}},
+    {t:"ye", x:"欸，賣芋圓的奶奶就在那！來，穿著你這身新衣，去跟奶奶炫耀一下——她最愛看囝仔穿新衫了！",
+      en:{x:"Hey, the taro-ball granny is right there! Come on, show off your new clothes to Granny — she loves seeing kids in new outfits!"}},
+    {t:"use", need:"新衣", label:"向芋圓奶奶炫耀新衣 👕✨", x:"奶奶笑得合不攏嘴：「哎唷～這囝仔穿新衫真緣投！來，芋圓多加你一勺！」",
+      en:{label:"Show off your new clothes to Granny 👕✨", x:"Granny beams ear to ear: “Aww~ this kid looks so handsome in new clothes! Here, an extra scoop of taro balls for you!”"}},
     {t:"dex", who:"芋圓奶奶"},
-    {t:"photo", slot:"7", label:"回到平溪那年・合照", prompt:"用專屬合照框，跟我、芸芸、阿任、芋圓奶奶合照一張吧！📸"},
+    {t:"photo", slot:"7", label:"回到平溪那年・合照", prompt:"用專屬合照框，跟我、芸芸、阿任、芋圓奶奶合照一張吧！📸",
+      en:{prompt:"Use the special group frame for a photo with me, Yunyun, Aren and the taro-ball Granny! 📸"}},
     {t:"open", key:"j7", prompt:"旅程的最後，寫一句話送給這趟「回到平溪那年」，也送給小葉吧。",
-      warm:"收到！這會是你遊記最美的結尾 💌"},
+      warm:"收到！這會是你遊記最美的結尾 💌",
+      en:{prompt:"At journey's end, write a line for this trip “back to old Pingxi” — and for Toni too.",
+      warm:"Got it! This will be the most beautiful ending to your diary 💌"}},
     {t:"stamp"},
-    {t:"ye", x:"小葉請客！把這個完成畫面拿給小葉本人看——我就帶你去吃平溪最道地的芋圓！🍠"},
+    {t:"ye", x:"小葉請客！把這個完成畫面拿給小葉本人看——我就帶你去吃平溪最道地的芋圓！🍠",
+      en:{x:"Toni's treat! Show this finished screen to Toni himself — and I'll take you for the most authentic taro balls in Pingxi! 🍠"}},
     {t:"final"},
   ]},
 ];
@@ -613,6 +693,145 @@ let S=load();
 function load(){try{const o=JSON.parse(localStorage.getItem(SAVE));return o&&o.album&&o.items?o:fresh();}catch(e){return fresh();}}
 function fresh(){return {codename:"",stage:1,answers:{},journal:{},album:{},items:{},dex:{},stamps:[],done:false};}
 function save(){try{localStorage.setItem(SAVE,JSON.stringify(S));}catch(e){}}
+
+/* =========================================================
+   雙語（i18n）：LANG='zh' | 'en'
+   ========================================================= */
+let LANG = (function(){try{return localStorage.getItem('pingxi_lang')||null;}catch(e){return null;}})();
+function EN(){return LANG==='en';}
+/* beat 欄位取值（beat.en 子物件優先） */
+function bx(b,f){return (EN()&&b.en&&b.en[f]!=null)?b.en[f]:b[f];}
+/* 關卡欄位（place/story/hint 有 En 版） */
+function sg(st,f){return (EN()&&st[f+'En']!=null)?st[f+'En']:st[f];}
+/* 圖鑑名稱/說明 */
+function dexName(k){const d=DEX[k]||{};return (EN()&&d.nameEn)?d.nameEn:(d.name||k);}
+function dexDesc(k){const d=DEX[k]||{};return (EN()&&d.descEn)?d.descEn:(d.desc||'');}
+/* 拍照點 / 相簿 / 明信片 共用欄位（zh,en） */
+const SLOTS=[
+  ["1","平溪火車站","Pingxi Station"],
+  ["2","成盈利商店","Chengyingli Store"],
+  ["3","新建成百貨行","Xinjiancheng Dept. Store"],
+  ["4","觀音巖","Guanyin Rock"],
+  ["5a","八仙洞・玩碟仙","Baxian Cave · Spirit Game"],
+  ["5b","防空洞・鞭炮大戰","Tunnel · Firecracker Battle"],
+  ["5c","平安鐘・烤地瓜","Peace Bell · Sweet Potatoes"],
+  ["6","美雲布藝・新衣","Meiyun Fabric · New Clothes"],
+  ["7","回到平溪那年・合照","Back to Pingxi · Group Photo"],
+];
+function slotLabel(id){const s=SLOTS.find(x=>x[0]===id);return s?(EN()?s[2]:s[1]):id;}
+
+/* UI 字串字典 */
+const UI={
+  coverTag:{zh:"平溪老街尋寶走讀",en:"Pingxi Old Street Treasure Walk"},
+  coverP:{zh:"跟著平溪最強嚮導「小葉」，一站一站走進老街，<br>用五感、相機與趣味相框，穿越回到平溪的那些年。",
+          en:"Follow Pingxi's top guide, Toni, into the old street stop by stop —<br>with your senses, your camera and fun photo frames, travel back to old Pingxi."},
+  coverCta:{zh:"開始走讀 →",en:"Start the Walk →"},
+  coverDoneP:{zh:"你已完成旅程！可翻閱你的平溪寫真書與明信片，或重新開始。",
+              en:"You've finished the journey! Browse your Photo Diary and postcard, or start over."},
+  coverCtaDone:{zh:"翻閱平溪寫真書 📖",en:"Open my Photo Diary 📖"},
+  coverCtaResume:{zh:n=>"繼續走讀（第 "+n+" 關）→",en:n=>"Resume the walk (Stage "+n+") →"},
+  advance:{zh:"繼續 ▾",en:"Continue ▾"},
+  speaker:{zh:"小葉",en:"Toni"},
+  stageNo:{zh:n=>"第 "+n+" 關 / STAGE "+n,en:n=>"STAGE "+n+" / 7"},
+  getItem:{zh:"獲得道具",en:"Item obtained"},
+  dexPlus:{zh:"📖 圖鑑 +1",en:"📖 Dex +1"},
+  stampOk:{zh:p=>"🎉 「"+p+"」打卡成功 ✓",en:p=>"🎉 Checked in at “"+p+"” ✓"},
+  mission:{zh:"任務 MISSION",en:"MISSION"},
+  submit:{zh:"送出",en:"Submit"},
+  codenameEmpty:{zh:"先幫自己取個探險代號吧！",en:"Give yourself an adventure name first!"},
+  wrongHead:{zh:"嗯～好像不太對喔 🤔 ",en:"Hmm, that doesn't look right 🤔 "},
+  tipPrefix:{zh:"提示：",en:"Hint: "},
+  wrongMust:{zh:"答對才能過關！",en:"Get it right to pass!"},
+  reveal3:{zh:a=>"別急，小葉偷偷告訴你：答案是「<b>"+a+"</b>」，再輸入一次吧！",en:a=>"No worries — Toni will tell you: the answer is “<b>"+a+"</b>”. Try once more!"},
+  revealRight:{zh:"✅ 答對了！",en:"✅ Correct!"},
+  openH:{zh:"寫進遊記 ✍️",en:"Add to Diary ✍️"},
+  openPh:{zh:"寫下你的話…（沒有標準答案）",en:"Write your thoughts… (no right answer)"},
+  openBtn:{zh:"寫好了 / 下一步",en:"Done / Next"},
+  choiceH:{zh:"選一個 👇",en:"Pick one 👇"},
+  useH:{zh:"🎒 使用道具",en:"🎒 Use Item"},
+  useMissing:{zh:n=>"咦？背包裡好像沒有「"+n+"」…（先去對的關卡拿到它吧）",en:n=>"Hmm, you don't have “"+n+"” in your bag yet… (grab it at the right stage first)"},
+  photoHead:{zh:"📸 拍照＋貼貼紙（選拍，別客氣多拍幾張！）",en:"📸 Photo + stickers (optional — snap as many as you like!)"},
+  photoOpen:{zh:"開啟相機 · 拍一張",en:"Open camera · take one"},
+  photoRetake:{zh:"重拍 / 換一張",en:"Retake / swap"},
+  photoDoneBtn:{zh:"拍好了 / 略過 →",en:"Done / skip →"},
+  photoCont:{zh:"繼續 →",en:"Continue →"},
+  photoReadErr:{zh:"照片讀取失敗，換一張試試看",en:"Couldn't read that photo — try another one"},
+  editorTitle:{zh:"貼貼紙裝飾 🎨",en:"Decorate with stickers 🎨"},
+  editorHint:{zh:"點下方貼紙加入 · 拖曳移動 · 右下角 ⤡ 縮放 · ✕ 刪除",en:"Tap a sticker to add · drag to move · ⤡ to resize · ✕ to delete"},
+  editorUseOrig:{zh:"用原圖",en:"Use original"},
+  editorDone:{zh:"完成 ✓",en:"Done ✓"},
+  nextStop:{zh:"🔎 下一站",en:"🔎 Next Stop"},
+  mapCap:{zh:(n,p)=>"🗺️ 紅色 <b>"+n+"</b> 就是「"+p+"」的位置（平溪老街）",en:(n,p)=>"🗺️ Red marker <b>"+n+"</b> is “"+p+"” (Pingxi Old Street)"},
+  goStage:{zh:n=>"前往第 "+n+" 關 →",en:n=>"Go to Stage "+n+" →"},
+  mapAlt:{zh:p=>"前往"+p+"的位置",en:p=>"Location of "+p},
+  finalBtn:{zh:"領取我的平溪小小遊記 📖",en:"Get My Pingxi Photo Diary 📖"},
+  bagTitle:{zh:"🎒 我的收藏",en:"🎒 My Collection"},
+  tabItems:{zh:"背包",en:"Items"}, tabStamp:{zh:"打卡",en:"Stamps"}, tabDex:{zh:"圖鑑",en:"Dex"}, tabAlbum:{zh:"相簿",en:"Album"},
+  itemUsed:{zh:"已使用",en:"Used"}, itemHave:{zh:"持有中",en:"In bag"},
+  itemsEmpty:{zh:"背包還是空的，往前走就會拿到道具囉！",en:"Your bag is empty — keep walking and you'll pick up items!"},
+  stampStop:{zh:n=>"第 "+n+" 站",en:n=>"Stop "+n}, stampDone:{zh:"已打卡 ✓",en:"Checked in ✓"}, stampNot:{zh:"尚未抵達",en:"Not yet"},
+  stampProg:{zh:n=>"打卡進度 "+n+" / 7",en:n=>"Check-ins "+n+" / 7"},
+  dexLockDesc:{zh:"尚未解鎖",en:"Locked"},
+  albumEmpty:{zh:"尚未拍照",en:"No photo yet"},
+  finaleTitle:{zh:"📖 我的平溪寫真書",en:"📖 My Pingxi Photo Diary"},
+  jbSub:{zh:(nm,t)=>"　"+nm+" · 共 "+t+" 頁",en:(nm,t)=>"　"+nm+" · "+t+" pages"},
+  dlPage:{zh:"📥 存這一頁到相簿",en:"📥 Save this page"},
+  dlAll:{zh:"📥 存整本",en:"📥 Save all"},
+  postcardH:{zh:"🖼️ 順手做了張明信片",en:"🖼️ A postcard, made for you"},
+  postcardSub:{zh:"一路照片自動拼貼，可儲存分享",en:"Your photos auto-collaged — save & share"},
+  dlPostcard:{zh:"📥 存明信片到相簿",en:"📥 Save postcard"},
+  bagBtn:{zh:"🎒 背包 · 圖鑑 · 相簿",en:"🎒 Items · Dex · Album"},
+  restartBtn:{zh:"重新開始",en:"Restart"},
+  restartConfirm:{zh:"確定要清除進度、重新開始嗎？",en:"Clear your progress and start over?"},
+  defaultName:{zh:"平溪小旅人",en:"Pingxi Traveler"},
+  friend:{zh:"朋友",en:"friend"},
+  explorer:{zh:"探險家",en:"Explorer"},
+  bookCoverEn:{zh:"MY PINGXI PHOTO DIARY",en:"MY PINGXI PHOTO DIARY"},
+  bookCoverBig:{zh:"我的平溪寫真",en:"My Pingxi Photo Diary"},
+  swipeHint:{zh:"← 左右滑動翻頁 →",en:"← swipe to flip →"},
+  endBig:{zh:"回到平溪那年",en:"Back to Old Pingxi"},
+  endEn:{zh:"THE END · 完",en:"THE END"},
+  endThanks:{zh:"謝謝你陪小葉走這一趟。<br>有空要再回來平溪喔！🏮",en:"Thanks for walking with Toni.<br>Come back to Pingxi soon! 🏮"},
+  endThanksShort:{zh:"謝謝你陪小葉走這一趟 🏮",en:"Thanks for walking with Toni 🏮"},
+  postcardSub2:{zh:"平溪老街走讀 · 旅行寫真明信片",en:"Pingxi Old Street Walk · Travel Postcard"},
+  postcardEmpty1:{zh:"這趟還沒拍照——回去邊玩邊拍，",en:"No photos yet — go back, play and snap along,"},
+  postcardEmpty2:{zh:"就會長出你專屬的平溪明信片！",en:"and your own Pingxi postcard will grow!"},
+  postcardCertify:{zh:(d,n)=>"平溪囝仔認證 · "+d+" · 打卡 "+n+"/7",en:(d,n)=>"Certified Pingxi Kid · "+d+" · check-ins "+n+"/7"},
+};
+function T(key){const o=UI[key];return o?(EN()?(o.en!=null?o.en:o.zh):o.zh):'';}
+function defName(){return S.codename||T('defaultName');}
+
+/* 套用首頁/靜態介面的語言字串 */
+function applyStaticI18n(){
+  document.documentElement.lang = EN()?'en':'zh-Hant';
+  const set=(id,html)=>{const el=document.getElementById(id);if(el)el.innerHTML=html;};
+  set('coverTag',T('coverTag'));
+  set('coverCta',T('coverCta'));
+  // 封面段落 / CTA 依進度
+  const p=document.getElementById('coverP');
+  if(p){ if(S.done) p.innerHTML=T('coverDoneP'); else p.innerHTML=T('coverP'); }
+  const cta=document.getElementById('coverCta');
+  if(cta){ if(S.done){cta.innerHTML=T('coverCtaDone');cta.setAttribute('onclick',"go('finale')");}
+    else if(S.stage>1){cta.innerHTML=T('coverCtaResume')(S.stage);}
+    else {cta.innerHTML=T('coverCta');} }
+  set('finTitle',T('finaleTitle'));
+  set('dlPageBtn',T('dlPage')); set('dlAllBtn',T('dlAll'));
+  set('postcardH',T('postcardH')); set('postcardSub',T('postcardSub'));
+  set('dlBtn',T('dlPostcard')); set('bagBtnFin',T('bagBtn')); set('restartBtn',T('restartBtn'));
+  set('bagTitle',T('bagTitle'));
+  set('tabItems',T('tabItems')); set('tabStamp',T('tabStamp')); set('tabDex',T('tabDex')); set('tabAlbum',T('tabAlbum'));
+  set('edTitle',T('editorTitle')); set('edHint',T('editorHint'));
+  set('edCancel',T('editorUseOrig')); set('edDone',T('editorDone'));
+  const adv=document.getElementById('advance'); if(adv&&!adv.classList.contains('hidden'))adv.textContent=T('advance');
+  const lz=document.getElementById('langZh'),le=document.getElementById('langEn');
+  if(lz&&le){lz.classList.toggle('on',!EN());le.classList.toggle('on',EN());}
+}
+function setLang(l){LANG=l;try{localStorage.setItem('pingxi_lang',l);}catch(e){}
+  applyStaticI18n();
+  // 若已在遊戲中，立即用新語言重繪當前關卡
+  if(document.getElementById('play').classList.contains('on')) renderStage();
+  if(document.getElementById('finale').classList.contains('on')){buildBook();buildPostcard();}
+}
 
 /* ---------- 導覽 ---------- */
 function go(where){
@@ -638,9 +857,9 @@ function renderStage(){
   document.getElementById('play').classList.add('on');
   document.getElementById('topbar').classList.remove('hidden');
   const st=STAGES[S.stage-1];
-  document.getElementById('sNo').textContent="第 "+st.n+" 關 / STAGE "+st.n;
-  document.getElementById('sZh').textContent=st.zh;
-  document.getElementById('sEn').textContent=st.en;
+  document.getElementById('sNo').textContent=T('stageNo')(st.n);
+  document.getElementById('sZh').textContent=EN()?st.en:st.zh;
+  document.getElementById('sEn').textContent=EN()?st.zh:st.en;
   const chat=document.getElementById('chat');chat.innerHTML='';
   renderDots();
   playBeat(st,0,chat);
@@ -649,11 +868,11 @@ function renderStage(){
 
 /* ---------- 逐段引擎 ---------- */
 let PLAY_QUEUE=[];
-function nm(txt){return (txt||'').replace(/\{name\}/g, S.codename||'朋友');}
+function nm(txt){return (txt||'').replace(/\{name\}/g, S.codename||T('friend'));}
 function appendYe(chat,text){
-  const label=document.createElement('div');label.className='name';label.textContent='小葉';chat.appendChild(label);
+  const label=document.createElement('div');label.className='name';label.textContent=T('speaker');chat.appendChild(label);
   const row=document.createElement('div');row.className='msg';
-  row.innerHTML=`<div class="avatar"><img src="${XIAOYE}" alt="小葉"></div><div class="bubble">${nm(text)}</div>`;
+  row.innerHTML=`<div class="avatar"><img src="${XIAOYE}" alt="${T('speaker')}"></div><div class="bubble">${nm(text)}</div>`;
   chat.appendChild(row);scrollChat();
 }
 function appendNarr(chat,text){
@@ -665,7 +884,7 @@ function appendSys(chat,html,loot){
 }
 function showAdvance(cont){
   const adv=document.getElementById('advance');
-  adv.classList.remove('hidden');adv.textContent='繼續 ▾';
+  adv.classList.remove('hidden');adv.textContent=T('advance');
   PLAY_QUEUE=[cont];
 }
 function hideAdvance(){document.getElementById('advance').classList.add('hidden');}
@@ -676,21 +895,21 @@ function playBeat(st,i,chat){
   const b=st.beats[i];
   const cont=()=>playBeat(st,i+1,chat);
   switch(b.t){
-    case 'ye': appendYe(chat,b.x); showAdvance(cont); break;
-    case 'narr': appendNarr(chat,b.x); showAdvance(cont); break;
+    case 'ye': appendYe(chat,bx(b,'x')); showAdvance(cont); break;
+    case 'narr': appendNarr(chat,bx(b,'x')); showAdvance(cont); break;
     case 'scene': showScene(st,chat); showAdvance(cont); break;
     case 'get':
       S.items[b.item]='have'; save();
-      appendSys(chat,`<img class="loot-img" src="${ITEM_IMG[b.item]||''}" alt="" onerror="this.style.display='none'"><div>獲得道具　<b>${b.item}</b></div>`,true);
-      if(b.x) appendNarr(chat,b.x);
+      appendSys(chat,`<img class="loot-img" src="${ITEM_IMG[b.item]||''}" alt="" onerror="this.style.display='none'"><div>${T('getItem')}　<b>${dexName(b.item)}</b></div>`,true);
+      if(bx(b,'x')) appendNarr(chat,bx(b,'x'));
       renderDots(); showAdvance(cont); break;
     case 'dex':
       if(!S.dex[b.who]){S.dex[b.who]=true;save();}
-      appendSys(chat,`📖 圖鑑 +1　<b style="color:var(--gold)">${(DEX[b.who]||{}).name||b.who}</b>`);
+      appendSys(chat,`${T('dexPlus')}　<b style="color:var(--gold)">${dexName(b.who)}</b>`);
       renderDots(); showAdvance(cont); break;
     case 'stamp':
       if(!S.stamps.includes(st.n)){S.stamps.push(st.n);save();renderDots();}
-      appendSys(chat,`🎉 「${st.place}」打卡成功 ✓`); showAdvance(cont); break;
+      appendSys(chat,T('stampOk')(sg(st,'place'))); showAdvance(cont); break;
     case 'input': hideAdvance(); renderInput(b,st,chat,cont); break;
     case 'open': hideAdvance(); renderOpen(b,st,chat,cont); break;
     case 'choice': hideAdvance(); renderChoice(b,st,chat,cont); break;
@@ -702,23 +921,25 @@ function playBeat(st,i,chat){
 }
 function showScene(st,chat){
   const sc=document.createElement('div');sc.className='scene';const img=SCENE_IMG[st.n];
+  const aitag=EN()?'AI Time Machine':'AI 時光機影像';const back=EN()?'back then':'那年';
   sc.innerHTML = img
-    ? `<span class="aitag">AI 時光機影像</span><img src="${img}" alt=""><div class="cap"><b>${st.place}</b> · 那年</div>`
-    : `<span class="aitag">AI 影像</span><div class="ph"><div><div class="ic">🕰️</div><div class="lb">${st.place} · 那年</div></div></div>`;
+    ? `<span class="aitag">${aitag}</span><img src="${img}" alt=""><div class="cap"><b>${sg(st,'place')}</b> · ${back}</div>`
+    : `<span class="aitag">${aitag}</span><div class="ph"><div><div class="ic">🕰️</div><div class="lb">${sg(st,'place')} · ${back}</div></div></div>`;
   chat.appendChild(sc);scrollChat();
 }
 
 /* ---- 互動：輸入題 ---- */
 function renderInput(b,st,chat,cont){
   const box=document.createElement('div');box.className='task';
-  box.innerHTML=`<h4>任務 MISSION</h4>
-    <div class="field"><label>${b.label}</label><input data-k="${b.key}" placeholder="${b.ph||''}"></div>
-    <button class="btn">送出</button>`;
+  const tip=bx(b,'tip');
+  box.innerHTML=`<h4>${T('mission')}</h4>
+    <div class="field"><label>${bx(b,'label')}</label><input data-k="${b.key}" placeholder="${bx(b,'ph')||''}"></div>
+    <button class="btn">${T('submit')}</button>`;
   chat.appendChild(box);
   const input=box.querySelector('input'); if(S.answers[b.key])input.value=S.answers[b.key];
   box.querySelector('.btn').onclick=()=>{
     const val=(input.value||'').trim(); S.answers[b.key]=val;
-    if(b.key==='codename'){ if(!val){alert('先幫自己取個探險代號吧！');return;} S.codename=val; }
+    if(b.key==='codename'){ if(!val){alert(T('codenameEmpty'));return;} S.codename=val; }
     if(b.accept&&b.confirmed){
       const ok=matchOne(val,b.accept);
       input.classList.toggle('bad',!ok);
@@ -726,15 +947,15 @@ function renderInput(b,st,chat,cont){
       if(!ok){
         TRIES[b.key]=(TRIES[b.key]||0)+1;
         const msg=TRIES[b.key]>=3
-          ? `別急，小葉偷偷告訴你：答案是「<b>${b.accept[0]}</b>」，再輸入一次吧！`
-          : `嗯～好像不太對喔 🤔 ${b.tip?('提示：'+b.tip+'。'):''}答對才能過關！`;
+          ? T('reveal3')(b.accept[0])
+          : `${T('wrongHead')}${tip?(T('tipPrefix')+tip+'。'):''}${T('wrongMust')}`;
         box.insertAdjacentHTML('beforeend',`<div class="reveal wrong">❌ ${msg}</div>`);scrollChat();return;
       }
     }
     save(); input.disabled=true; box.querySelector('.btn').classList.add('hidden');
     const oldW=box.querySelector('.reveal.wrong'); if(oldW)oldW.remove();
-    if(b.accept&&b.confirmed) box.insertAdjacentHTML('beforeend',`<div class="reveal right">✅ 答對了！</div>`);
-    if(b.warm) appendYe(chat,b.warm);
+    if(b.accept&&b.confirmed) box.insertAdjacentHTML('beforeend',`<div class="reveal right">${T('revealRight')}</div>`);
+    if(bx(b,'warm')) appendYe(chat,bx(b,'warm'));
     cont();
   };
   scrollChat();
@@ -743,16 +964,16 @@ function renderInput(b,st,chat,cont){
 /* ---- 互動：開放題（記入遊記） ---- */
 function renderOpen(b,st,chat,cont){
   const box=document.createElement('div');box.className='task';
-  box.innerHTML=`<h4>寫進遊記 ✍️</h4>
-    <div class="field"><label>${b.prompt}</label><textarea data-k="${b.key}" placeholder="寫下你的話…（沒有標準答案）"></textarea></div>
-    <button class="btn">寫好了 / 下一步</button>`;
+  box.innerHTML=`<h4>${T('openH')}</h4>
+    <div class="field"><label>${bx(b,'prompt')}</label><textarea data-k="${b.key}" placeholder="${T('openPh')}"></textarea></div>
+    <button class="btn">${T('openBtn')}</button>`;
   chat.appendChild(box);
   const ta=box.querySelector('textarea'); if(S.journal[b.key])ta.value=S.journal[b.key].text;
   box.querySelector('.btn').onclick=()=>{
     const text=(ta.value||'').trim();
-    if(text){ S.journal[b.key]={stage:st.n,place:st.place,prompt:b.prompt,text}; save(); }
+    if(text){ S.journal[b.key]={stage:st.n,place:sg(st,'place'),prompt:bx(b,'prompt'),text}; save(); }
     ta.disabled=true; box.querySelector('.btn').classList.add('hidden');
-    if(text&&b.warm) appendYe(chat,b.warm);
+    if(text&&bx(b,'warm')) appendYe(chat,bx(b,'warm'));
     cont();
   };
   scrollChat();
@@ -761,16 +982,17 @@ function renderOpen(b,st,chat,cont){
 /* ---- 互動：選擇題 ---- */
 function renderChoice(b,st,chat,cont){
   const box=document.createElement('div');box.className='task';
-  let html=`<h4>選一個 👇</h4><div class="q">${b.prompt}</div><div class="choice-btns">`;
-  b.options.forEach((o,idx)=>{html+=`<button data-i="${idx}">${o}</button>`;});
+  const opts=(EN()&&b.en&&b.en.options)?b.en.options:b.options;
+  let html=`<h4>${T('choiceH')}</h4><div class="q">${bx(b,'prompt')}</div><div class="choice-btns">`;
+  opts.forEach((o,idx)=>{html+=`<button data-i="${idx}">${o}</button>`;});
   html+=`</div>`; box.innerHTML=html; chat.appendChild(box);
   box.querySelectorAll('.choice-btns button').forEach(btn=>{
     btn.onclick=()=>{
-      const o=b.options[+btn.dataset.i];
-      S.journal[b.key]={stage:st.n,place:st.place,prompt:b.prompt,text:o}; save();
+      const o=opts[+btn.dataset.i];
+      S.journal[b.key]={stage:st.n,place:sg(st,'place'),prompt:bx(b,'prompt'),text:o}; save();
       box.querySelectorAll('.choice-btns button').forEach(x=>x.disabled=true);
       btn.style.borderColor='var(--gold)';btn.style.background='rgba(255,207,63,.14)';
-      if(b.warm) appendYe(chat,b.warm);
+      if(bx(b,'warm')) appendYe(chat,bx(b,'warm'));
       cont();
     };
   });
@@ -780,15 +1002,15 @@ function renderChoice(b,st,chat,cont){
 /* ---- 互動：使用道具 ---- */
 function renderUse(b,st,chat,cont){
   const box=document.createElement('div');box.className='usecard';
-  box.innerHTML=`<div class="uh">🎒 使用道具</div><button class="btn">${b.label}</button>`;
+  box.innerHTML=`<div class="uh">${T('useH')}</div><button class="btn">${bx(b,'label')}</button>`;
   chat.appendChild(box);
   box.querySelector('.btn').onclick=()=>{
     if(S.items[b.need]!=='have'&&S.items[b.need]!=='used'){
-      appendNarr(chat,`咦？背包裡好像沒有「${b.need}」…（先去對的關卡拿到它吧）`); cont(); return;
+      appendNarr(chat,T('useMissing')(dexName(b.need))); cont(); return;
     }
     S.items[b.need]='used'; save();
     box.querySelector('.btn').disabled=true;
-    if(b.x) appendNarr(chat,b.x);
+    if(bx(b,'x')) appendNarr(chat,bx(b,'x'));
     cont();
   };
   scrollChat();
@@ -799,12 +1021,12 @@ function renderPhoto(b,st,chat,cont){
   const have=S.album[b.slot];
   const box=document.createElement('div');box.className='photo-cap frame';
   box.innerHTML=`
-    <div class="pc-head">📸 拍照＋貼貼紙（選拍，別客氣多拍幾張！）</div>
-    <div class="pc-prompt">${b.prompt}</div>
+    <div class="pc-head">${T('photoHead')}</div>
+    <div class="pc-prompt">${bx(b,'prompt')}</div>
     <img class="photo-thumb ${have?'':'hidden'}" src="${have?have.data:''}" alt="">
     <label class="pc-btn"><input type="file" accept="image/*" capture="environment" hidden>
-      <span class="lbl">${have?'重拍 / 換一張':'開啟相機 · 拍一張'}</span></label>
-    <button class="btn sm">${have?'繼續 →':'拍好了 / 略過 →'}</button>`;
+      <span class="lbl">${have?T('photoRetake'):T('photoOpen')}</span></label>
+    <button class="btn sm">${have?T('photoCont'):T('photoDoneBtn')}</button>`;
   chat.appendChild(box);
   const fileInput=box.querySelector('input[type=file]');
   const thumb=box.querySelector('.photo-thumb');
@@ -828,14 +1050,14 @@ function handlePhoto(input,b,st,thumb,lbl,goBtn){
     c.getContext('2d').drawImage(img,0,0,w,h);
     const base=c.toDataURL('image/jpeg',0.82);
     URL.revokeObjectURL(url);
-    openEditor(base, b.slot, b.label, (finalData)=>{
-      S.album[b.slot]={data:finalData,label:b.label,stage:st.n}; save(); renderDots();
+    openEditor(base, b.slot, slotLabel(b.slot), (finalData)=>{
+      S.album[b.slot]={data:finalData,label:slotLabel(b.slot),stage:st.n}; save(); renderDots();
       if(thumb){thumb.src=finalData;thumb.classList.remove('hidden');}
-      if(lbl)lbl.textContent='重拍 / 換一張';
-      if(goBtn)goBtn.textContent='繼續 →';
+      if(lbl)lbl.textContent=T('photoRetake');
+      if(goBtn)goBtn.textContent=T('photoCont');
     });
   };
-  img.onerror=()=>{alert('照片讀取失敗，換一張試試看');URL.revokeObjectURL(url);};
+  img.onerror=()=>{alert(T('photoReadErr'));URL.revokeObjectURL(url);};
   img.src=url;
 }
 
@@ -915,9 +1137,9 @@ async function composeEditor(){
   }
   const bh=70;ctx.fillStyle='rgba(29,49,40,.82)';ctx.fillRect(0,H-bh,W,bh);
   ctx.fillStyle='#ffcf3f';ctx.font='700 34px '+RFONT;ctx.textAlign='left';ctx.textBaseline='middle';
-  ctx.fillText(EDITOR.label||'平溪囝仔時光機',30,H-bh/2);
+  ctx.fillText(EDITOR.label||(EN()?'Pingxi Time Machine':'平溪囝仔時光機'),30,H-bh/2);
   ctx.textAlign='right';ctx.fillStyle='rgba(244,239,224,.9)';ctx.font='600 22px system-ui';
-  ctx.fillText('平溪囝仔時光機',W-28,H-bh/2);
+  ctx.fillText(EN()?'PINGXI TIME MACHINE':'平溪囝仔時光機',W-28,H-bh/2);
   ctx.textAlign='left';ctx.textBaseline='alphabetic';
   return c.toDataURL('image/jpeg',0.85);
 }
@@ -935,15 +1157,17 @@ function endStage(st,chat){
   const next=STAGES[st.n]; // 下一關（st.n 為目前關號，陣列 0-based 即下一關）
   if(st.hint){
     const nh=document.createElement('div');nh.className='next-hint';
-    let inner=`<div class="k">🔎 下一站</div><div class="v">「${st.hint}」</div>`;
+    const hintTxt=sg(st,'hint');
+    let inner=`<div class="k">${T('nextStop')}</div><div class="v">${EN()?hintTxt:('「'+hintTxt+'」')}</div>`;
     if(next){
-      inner+=`<img class="map-thumb" src="slides/maps/stage${next.n}.png" alt="前往${next.place}的位置" onerror="this.style.display='none'">`;
-      inner+=`<div class="map-cap">🗺️ 紅色 <b>${next.n}</b> 就是「${next.place}」的位置（平溪老街）</div>`;
+      const np=sg(next,'place');
+      inner+=`<img class="map-thumb" src="slides/maps/stage${next.n}.png" alt="${T('mapAlt')(np)}" onerror="this.style.display='none'">`;
+      inner+=`<div class="map-cap">${T('mapCap')(next.n,np)}</div>`;
     }
     nh.innerHTML=inner;chat.appendChild(nh);
   }
   const cont=document.createElement('div');cont.style.padding='6px 0 0';
-  cont.innerHTML=`<button class="btn">前往第 ${st.n+1} 關 →</button>`;chat.appendChild(cont);
+  cont.innerHTML=`<button class="btn">${T('goStage')(st.n+1)}</button>`;chat.appendChild(cont);
   cont.querySelector('.btn').onclick=nextStage;
   scrollChat(true);
 }
@@ -951,7 +1175,7 @@ function renderFinalBtn(chat){
   if(!S.stamps.includes(7))S.stamps.push(7);
   S.done=true;save();renderDots();
   const c=document.createElement('div');c.style.padding='10px 0 0';
-  c.innerHTML=`<button class="btn brick">領取我的平溪小小遊記 📖</button>`;chat.appendChild(c);
+  c.innerHTML=`<button class="btn brick">${T('finalBtn')}</button>`;chat.appendChild(c);
   c.querySelector('.btn').onclick=()=>go('finale');
   scrollChat(true);
 }
@@ -970,12 +1194,12 @@ function renderItems(){
   const items=["鞭炮","萬金油","地瓜","新衣"];
   document.getElementById('itemGrid').innerHTML=items.map(k=>{
     const st=S.items[k]; if(!st)return '';
-    const d=DEX[k]||{name:k};
-    const stTxt=st==='used'?'已使用':'持有中';
+    const d=DEX[k]||{};
+    const stTxt=st==='used'?T('itemUsed'):T('itemHave');
     const emo=d.img?`<img class="emo" src="${d.img}" alt="" onerror="this.style.display='none'">`:`<span class="emo">🎁</span>`;
     return `<div class="bp-item ${st==='used'?'used':''}">${emo}
-      <div><div class="nm">${d.name}</div><div class="st">${stTxt}</div></div></div>`;
-  }).join('')||`<div class="sub" style="grid-column:1/3;color:rgba(244,239,224,.6)">背包還是空的，往前走就會拿到道具囉！</div>`;
+      <div><div class="nm">${dexName(k)}</div><div class="st">${stTxt}</div></div></div>`;
+  }).join('')||`<div class="sub" style="grid-column:1/3;color:rgba(244,239,224,.6)">${T('itemsEmpty')}</div>`;
 }
 function renderStamps(){
   const done=S.stamps.length;
@@ -983,10 +1207,10 @@ function renderStamps(){
     const ok=S.stamps.includes(st.n);
     return `<div class="dex-cell ${ok?'':'lock'}">
       <div class="emo">${ok?'📍':'❔'}</div>
-      <div class="nm">${ok?st.place:'第 '+st.n+' 站'}</div>
-      <div class="ds">${ok?'已打卡 ✓':'尚未抵達'}</div></div>`;
+      <div class="nm">${ok?sg(st,'place'):T('stampStop')(st.n)}</div>
+      <div class="ds">${ok?T('stampDone'):T('stampNot')}</div></div>`;
   }).join('')+`<div class="dex-cell" style="grid-column:1/3;background:rgba(255,207,63,.1);border-color:rgba(255,207,63,.4)">
-      <div class="nm" style="color:var(--gold)">打卡進度 ${done} / 7</div></div>`;
+      <div class="nm" style="color:var(--gold)">${T('stampProg')(done)}</div></div>`;
 }
 function renderDex(){
   const order=["小葉","芸芸","阿任","大乾媽","美雲阿姨","芋圓奶奶","鞭炮","萬金油","地瓜","新衣"];
@@ -995,16 +1219,14 @@ function renderDex(){
     const emo=d.img?`<img src="${d.img}" alt="">`:(d.emo||'❔');
     return `<div class="dex-cell ${got?'':'lock'}">
       <div class="emo">${got?emo:'❔'}</div>
-      <div class="nm">${got?d.name:'？？？'}</div>
-      <div class="ds">${got?d.desc:'尚未解鎖'}</div></div>`;
+      <div class="nm">${got?dexName(k):'？？？'}</div>
+      <div class="ds">${got?dexDesc(k):T('dexLockDesc')}</div></div>`;
   }).join('');
 }
 function renderAlbum(){
-  const slots=[["1","平溪火車站"],["2","成盈利商店"],["3","新建成百貨行"],["4","觀音巖"],
-    ["5a","八仙洞・玩碟仙"],["5b","防空洞・鞭炮大戰"],["5c","平安鐘・烤地瓜"],["6","美雲布藝・新衣"],["7","回到平溪・合照"]];
-  document.getElementById('albumGrid').innerHTML=slots.map(([slot,label])=>{
-    const p=S.album[slot];
-    return `<div class="album-cell">${p?`<img src="${p.data}" alt="">`:`<div class="empty">尚未拍照</div>`}<div class="tag">${label}</div></div>`;
+  document.getElementById('albumGrid').innerHTML=SLOTS.map(s=>{
+    const slot=s[0];const p=S.album[slot];
+    return `<div class="album-cell">${p?`<img src="${p.data}" alt="">`:`<div class="empty">${T('albumEmpty')}</div>`}<div class="tag">${slotLabel(slot)}</div></div>`;
   }).join('');
 }
 
@@ -1019,13 +1241,13 @@ function buildBook(){
   const pages=[];
   pages.push({type:'cover', bg:firstPhoto()});
   STAGES.forEach(st=>{
-    const photos=Object.keys(S.album).filter(k=>S.album[k]&&S.album[k].stage===st.n).map(k=>S.album[k]);
+    const keys=Object.keys(S.album).filter(k=>S.album[k]&&S.album[k].stage===st.n);
     const note=Object.values(S.journal).filter(j=>j.stage===st.n).map(j=>j.text).join('\n');
-    if(photos.length){
-      photos.forEach((p,i)=>pages.push({type:'page',bg:p.data,place:st.place,en:enTail(st.en),num:st.n,
-        note:i===0?note:'',cap:p.label,story:i===0?st.story:''}));
+    if(keys.length){
+      keys.forEach((k,i)=>pages.push({type:'page',bg:S.album[k].data,place:sg(st,'place'),en:enTail(st.en),num:st.n,
+        note:i===0?note:'',cap:slotLabel(k),story:i===0?sg(st,'story'):''}));
     }else if(note){
-      pages.push({type:'page',bg:null,place:st.place,en:enTail(st.en),num:st.n,note,cap:'',story:st.story});
+      pages.push({type:'page',bg:null,place:sg(st,'place'),en:enTail(st.en),num:st.n,note,cap:'',story:sg(st,'story')});
     }
   });
   pages.push({type:'end'});
@@ -1035,16 +1257,16 @@ function buildBook(){
     if(pg.type==='cover'){
       el.className='book-page cover';
       el.innerHTML=(pg.bg?`<img class="bg" src="${pg.bg}">`:'')
-        +`<div class="content"><div class="en">MY PINGXI PHOTO DIARY</div>
-           <div class="big">我的平溪寫真</div><div class="rule" style="margin:14px auto"></div>
-           <div style="color:var(--cream);font-size:15px">探險家　${escapeHtml(S.codename||'平溪小旅人')}</div>
-           <div style="color:rgba(244,239,224,.65);font-size:12px;margin-top:4px">${dateStr()}　·　打卡 ${S.stamps.length}/7</div>
-           <div style="color:rgba(244,239,224,.6);font-size:12px;margin-top:16px">← 左右滑動翻頁 →</div></div>`;
+        +`<div class="content"><div class="en">${T('bookCoverEn')}</div>
+           <div class="big">${T('bookCoverBig')}</div><div class="rule" style="margin:14px auto"></div>
+           <div style="color:var(--cream);font-size:15px">${T('explorer')}　${escapeHtml(defName())}</div>
+           <div style="color:rgba(244,239,224,.65);font-size:12px;margin-top:4px">${dateStr()}　·　${T('stampProg')(S.stamps.length)}</div>
+           <div style="color:rgba(244,239,224,.6);font-size:12px;margin-top:16px">${T('swipeHint')}</div></div>`;
     }else if(pg.type==='end'){
       el.className='book-page end';
-      el.innerHTML=`<div class="content"><div class="big">回到平溪那年</div>
-        <div class="en" style="color:var(--gold)">THE END · 完</div><div class="rule" style="margin:14px auto"></div>
-        <div style="color:rgba(244,239,224,.88);font-size:14px;max-width:82%;line-height:1.7">謝謝你陪小葉走這一趟。<br>有空要再回來平溪喔！🏮</div></div>`;
+      el.innerHTML=`<div class="content"><div class="big">${T('endBig')}</div>
+        <div class="en" style="color:var(--gold)">${T('endEn')}</div><div class="rule" style="margin:14px auto"></div>
+        <div style="color:rgba(244,239,224,.88);font-size:14px;max-width:82%;line-height:1.7">${T('endThanks')}</div></div>`;
     }else{
       el.className='book-page';
       const body=pg.note?escapeHtml(pg.note).replace(/\n/g,'<br>'):(pg.story||'');
@@ -1061,7 +1283,7 @@ function buildBook(){
   BOOK_PAGES=total; BOOK_DATA=pages; BOOK_IDX=0;
   renderBookDots(0);
   book.onscroll=()=>{const i=Math.round(book.scrollLeft/book.clientWidth);BOOK_IDX=i;renderBookDots(i);};
-  const sub=document.getElementById('jbSub');if(sub)sub.textContent=`　${S.codename||'平溪小旅人'} · 共 ${total} 頁`;
+  const sub=document.getElementById('jbSub');if(sub)sub.textContent=T('jbSub')(defName(),total);
 }
 
 /* ---- 寫真頁下載（合成為圖片） ---- */
@@ -1091,13 +1313,13 @@ async function composePage(pg){
     ctx.fillStyle='rgba(20,31,25,.45)';ctx.fillRect(0,0,W,H);
     ctx.textAlign='center';const cxc=W/2;let y=H*0.60;
     ctx.fillStyle='#ffcf3f';ctx.font='600 26px system-ui';
-    ctx.fillText(pg.type==='cover'?'MY PINGXI PHOTO DIARY':'THE END · 完',cxc,y);y+=64;
+    ctx.fillText(pg.type==='cover'?T('bookCoverEn'):T('endEn'),cxc,y);y+=64;
     ctx.fillStyle='#f4efe0';ctx.font='800 64px '+RFONT;
-    ctx.fillText(pg.type==='cover'?'我的平溪寫真':'回到平溪那年',cxc,y);y+=28;
+    ctx.fillText(pg.type==='cover'?T('bookCoverBig'):T('endBig'),cxc,y);y+=28;
     ctx.strokeStyle='#ffcf3f';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(cxc-42,y);ctx.lineTo(cxc+42,y);ctx.stroke();y+=52;
-    if(pg.type==='cover'){ctx.fillStyle='#f4efe0';ctx.font='600 32px '+RFONT;ctx.fillText('探險家　'+(S.codename||'平溪小旅人'),cxc,y);y+=42;
-      ctx.fillStyle='rgba(244,239,224,.72)';ctx.font='500 22px system-ui';ctx.fillText(dateStr()+'　·　打卡 '+S.stamps.length+'/7',cxc,y);}
-    else{ctx.fillStyle='rgba(244,239,224,.88)';ctx.font='500 26px '+RFONT;ctx.fillText('謝謝你陪小葉走這一趟 🏮',cxc,y);}
+    if(pg.type==='cover'){ctx.fillStyle='#f4efe0';ctx.font='600 32px '+RFONT;ctx.fillText(T('explorer')+'　'+defName(),cxc,y);y+=42;
+      ctx.fillStyle='rgba(244,239,224,.72)';ctx.font='500 22px system-ui';ctx.fillText(dateStr()+'　·　'+T('stampProg')(S.stamps.length),cxc,y);}
+    else{ctx.fillStyle='rgba(244,239,224,.88)';ctx.font='500 26px '+RFONT;ctx.fillText(T('endThanksShort'),cxc,y);}
     ctx.textAlign='left';return c.toDataURL('image/jpeg',0.9);
   }
   // 內頁：文字靠下
@@ -1147,17 +1369,18 @@ async function downloadPage(){
   if(!BOOK_DATA.length)return;
   const pg=BOOK_DATA[BOOK_IDX]||BOOK_DATA[0];
   const url=await composePage(pg);
-  const nm=pg.type==='cover'?'封面':pg.type==='end'?'封底':(pg.place||'頁');
-  await saveImage(url,`平溪寫真_${String(BOOK_IDX+1).padStart(2,'0')}_${nm}.jpg`);
+  const pre=EN()?'PingxiDiary':'平溪寫真';
+  const nm=pg.type==='cover'?(EN()?'Cover':'封面'):pg.type==='end'?(EN()?'End':'封底'):(pg.place||'page');
+  await saveImage(url,`${pre}_${String(BOOK_IDX+1).padStart(2,'0')}_${nm}.jpg`);
 }
 async function downloadAllPages(btn){
   if(!BOOK_DATA.length)return;
   const old=btn?btn.textContent:''; if(btn){btn.disabled=true;btn.textContent='準備中…';}
-  const files=[];
+  const files=[];const pre=EN()?'PingxiDiary':'平溪寫真';
   for(let i=0;i<BOOK_DATA.length;i++){
     const pg=BOOK_DATA[i];const url=await composePage(pg);
-    const nm=pg.type==='cover'?'封面':pg.type==='end'?'封底':(pg.place||'頁');
-    files.push(await dataURLtoFile(url,`平溪寫真_${String(i+1).padStart(2,'0')}_${nm}.jpg`));
+    const nm=pg.type==='cover'?(EN()?'Cover':'封面'):pg.type==='end'?(EN()?'End':'封底'):(pg.place||'page');
+    files.push(await dataURLtoFile(url,`${pre}_${String(i+1).padStart(2,'0')}_${nm}.jpg`));
   }
   if(btn){btn.disabled=false;btn.textContent=old;}
   // 一次分享全部（行動裝置可一次存到相簿）；不支援則逐張下載
@@ -1203,48 +1426,43 @@ async function buildPostcard(){
   const logo=await loadImg('slides/title-logo.png');
   if(logo){let lw=W-260,lh=lw*(logo.height/logo.width);const maxLh=150;if(lh>maxLh){lh=maxLh;lw=lh*(logo.width/logo.height);}
     ctx.drawImage(logo,(W-lw)/2,52,lw,lh);
-    ctx.fillStyle='rgba(244,239,224,.72)';ctx.textAlign='center';ctx.font='500 24px '+FONT_SANS;ctx.fillText('平溪老街走讀 · 旅行寫真明信片',W/2,52+lh+40);
-  }else{ctx.textAlign='center';ctx.fillStyle='#f4efe0';ctx.font='800 60px '+RFONT;ctx.fillText('平溪囝仔時光機',W/2,160);}
+    ctx.fillStyle='rgba(244,239,224,.72)';ctx.textAlign='center';ctx.font='500 24px '+FONT_SANS;ctx.fillText(T('postcardSub2'),W/2,52+lh+40);
+  }else{ctx.textAlign='center';ctx.fillStyle='#f4efe0';ctx.font='800 60px '+RFONT;ctx.fillText(EN()?'PINGXI TIME MACHINE':'平溪囝仔時光機',W/2,160);}
   ctx.strokeStyle='#ffcf3f';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(mx,290);ctx.lineTo(W-mx,290);ctx.stroke();
-  const slots=[["1","平溪火車站"],["2","成盈利商店"],["3","新建成百貨行"],["4","觀音巖"],
-    ["5a","八仙洞・玩碟仙"],["5b","防空洞・鞭炮大戰"],["5c","平安鐘・烤地瓜"],["6","美雲布藝・新衣"],["7","回到平溪・合照"]];
-  const items=slots.filter(s=>S.album[s[0]]);
+  const items=SLOTS.filter(s=>S.album[s[0]]);
   if(!items.length){ctx.fillStyle='rgba(244,239,224,.7)';ctx.textAlign='center';ctx.font='500 30px '+FONT_SANS;
-    ctx.fillText('這趟還沒拍照——回去邊玩邊拍，',W/2,900);ctx.fillText('就會長出你專屬的平溪明信片！',W/2,948);ctx.textAlign='left';return;}
+    ctx.fillText(T('postcardEmpty1'),W/2,900);ctx.fillText(T('postcardEmpty2'),W/2,948);ctx.textAlign='left';return;}
   // 主圖（優先合照 '7'）＋其餘 2×3
   const hero=items.find(s=>s[0]==='7')||items[0];
   const rest=items.filter(s=>s!==hero).slice(0,6);
   const fw=W-mx*2, fh=540, fyTop=316;
-  await pcCell(ctx,S.album[hero[0]].data,mx,fyTop,fw,fh,hero[1],true);
+  await pcCell(ctx,S.album[hero[0]].data,mx,fyTop,fw,fh,slotLabel(hero[0]),true);
   const colW=(fw-gap)/2, rowH=264, gy=fyTop+fh+28;
   for(let i=0;i<rest.length;i++){const col=i%2,row=(i/2|0);
     const x=mx+col*(colW+gap), y=gy+row*(rowH+gap);
-    await pcCell(ctx,S.album[rest[i][0]].data,x,y,colW,rowH,rest[i][1],false);
+    await pcCell(ctx,S.album[rest[i][0]].data,x,y,colW,rowH,slotLabel(rest[i][0]),false);
   }
   // 頁尾（往下、放大）
   ctx.textAlign='center';ctx.fillStyle='#f4efe0';ctx.font='800 48px '+RFONT;
-  ctx.fillText('探險家　'+(S.codename||'平溪小旅人'),W/2,1802);
+  ctx.fillText(T('explorer')+'　'+defName(),W/2,1802);
   ctx.fillStyle='rgba(244,239,224,.8)';ctx.font='600 34px '+FONT_SANS;
-  ctx.fillText('平溪囝仔認證 · '+dateStr()+' · 打卡 '+S.stamps.length+'/7',W/2,1856);
+  ctx.fillText(T('postcardCertify')(dateStr(),S.stamps.length),W/2,1856);
   ctx.textAlign='left';
 }
 async function downloadPostcard(){
   const c=document.getElementById('postcard');
   try{const url=c.toDataURL('image/jpeg',0.92);
-    await saveImage(url,'平溪明信片_'+(S.codename||'探險家')+'.jpg');}
-  catch(e){alert('儲存失敗，請改用長按圖片另存');}
+    await saveImage(url,(EN()?'PingxiPostcard_':'平溪明信片_')+(S.codename||T('explorer'))+'.jpg');}
+  catch(e){alert(EN()?'Save failed — long-press the image to save instead':'儲存失敗，請改用長按圖片另存');}
 }
 
-function restart(){ if(confirm('確定要清除進度、重新開始嗎？')){S=fresh();save();location.reload();} }
+function restart(){ if(confirm(T('restartConfirm'))){const keepLang=LANG;S=fresh();save();location.reload();} }
 
 /* ---------- 啟動 ---------- */
 (function init(){
   const ci=document.getElementById('coverImg');ci.src=SCENE_IMG[1];
   ci.onerror=()=>{ci.style.display='none';document.querySelector('.cover-hero').style.background='linear-gradient(160deg,#3f6151,#1d3128)';};
-  if(S.done){document.querySelector('#cover .cover-body p').innerHTML='你已完成旅程！可翻閱你的平溪寫真書與明信片，或重新開始。';
-    document.querySelector('#cover .cta').textContent='翻閱平溪寫真書 📖';
-    document.querySelector('#cover .cta').setAttribute('onclick',"go('finale')");}
-  else if(S.stage>1){document.querySelector('#cover .cta').textContent='繼續走讀（第 '+S.stage+' 關）→';}
+  applyStaticI18n(); // 依語言與進度套用封面文案、語言鍵
 })();
 </script>
 </body>
