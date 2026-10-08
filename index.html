@@ -526,10 +526,10 @@ const STAGES=[
   hint:"平溪人的百貨天堂「新建成百貨行」，地圖 3 號！",
   hintEn:"Pingxi folks' department-store heaven, “Xinjiancheng”, map #3!",
   beats:[
-    {t:"input", key:"store2", label:"到囉！看看招牌，把這家店的名字打給我（三個字）。", ph:"店名",
-      accept:["成盈利","chengyingli","cheng ying li"], confirmed:true, tip:"招牌上金金亮亮那三個字", warm:"沒錯，就是「成盈利」！這間柑仔店，我從小逛到大，超有感情 😎",
-      en:{label:"Here we are! Look at the sign and type the shop's name — the 3 Chinese characters, or its romanization “Chengyingli”.", ph:"shop name",
-      tip:"the three shiny golden characters on the sign", warm:"That's it — “Chengyingli”! I've shopped here since I was a kid, so many memories 😎"}},
+    {t:"input", key:"store2", label:"到囉！看看門口的地址，這家店是幾號？把號碼打給我。", ph:"號碼",
+      accept:["1","公園街1號","公園街一號","公園街1"], confirmed:true, tip:"門口的地址是「公園街◯號」", warm:"沒錯，公園街 1 號！這間柑仔店我從小逛到大，超有感情 😎",
+      en:{label:"Here we are! Check the address by the door — what's this shop's street number? Type the number.", ph:"number",
+      tip:"the address reads “No. ◯, Park Street” (公園街◯號)", warm:"That's it — No. 1, Park Street! I've shopped here since I was a kid 😎"}},
     {t:"ye", x:"你別看它小，以前庄裡的人半夜嘴饞、缺瓶醬油，敲敲門阿伯就開門——所以我們都笑說它是「平溪的 24 小時便利商店」！",
       en:{x:"Don't let its size fool you — back in the day, when villagers got a midnight craving or ran out of soy sauce, they'd knock and the owner would open up. That's why we call it “Pingxi's 24-hour convenience store”!"}},
     {t:"scene"},
@@ -551,12 +551,12 @@ const STAGES=[
   story:"山城裡什麼都有的百貨行，是平溪人的小天堂。",
   storyEn:"A mountain-town department store that had everything — a little paradise for Pingxi folks.",
   hint:"有觀音、有香火的「觀音巖」，地圖 4 號那棟金碧輝煌建築的 2 樓！",
-  hintEn:"“Guanyin Rock”, with its incense and the Goddess — on the 2nd floor of that magnificent building at map #4!",
+  hintEn:"“Guanyin Temple”, with its incense and the Goddess — on the 2nd floor of that magnificent building at map #4!",
   beats:[
-    {t:"input", key:"store3", label:"看到那棟氣派的建築了嗎？把店名打給我（三個字）。", ph:"店名",
-      accept:["新建成","xinjiancheng","xin jian cheng"], confirmed:true, tip:"門面上的三個大字", warm:"對！「新建成」，平溪老街的百貨天花板 💅",
-      en:{label:"See that grand building? Type its name — the 3 Chinese characters, or its romanization “Xinjiancheng”.", ph:"shop name",
-      tip:"the three big characters on the facade", warm:"Yes! “Xinjiancheng” — the pinnacle of Pingxi Old Street shopping 💅"}},
+    {t:"input", key:"store3", label:"這家沒有門牌～換個方式考你：他們最有人氣的明星商品「潤膚霜」，是什麼「牌」的？（提示：一種白白的極地動物）", ph:"品牌",
+      accept:["白熊","白熊牌","polar bear","polarbear"], confirmed:true, tip:"包裝上有一隻白白的熊，英文 Polar Bear", warm:"答對！「白熊牌潤膚霜」🐻 平溪人家家都有一罐，這就是新建成的招牌貨！",
+      en:{label:"No door plate here~ so a different challenge: their most popular star product is a nourishing cream — named after which white Arctic animal brand?", ph:"brand",
+      tip:"there's a white bear on the jar — “Polar Bear”", warm:"Correct! “Polar Bear Special Nourishing Cream” 🐻 — a jar in every Pingxi home, Xinjiancheng's signature item!"}},
     {t:"ye", x:"這是我們平溪的「百貨公司」！化妝品、衣服、制服、藥品…你想得到的通通有。以前山城交通不便，這間店根本是平溪人的小型天堂。",
       en:{x:"This is our Pingxi “department store”! Cosmetics, clothes, uniforms, medicine… everything you can think of. Back when the mountains were hard to reach, this shop was a little paradise."}},
     {t:"scene"},
@@ -568,21 +568,21 @@ const STAGES=[
     {t:"stamp"},
   ]},
 
- {n:4, zh:"乾媽的家", en:"Godmother's Home · Guanyin Rock", place:"觀音巖", placeEn:"Guanyin Rock", map:"平溪 觀音巖",
+ {n:4, zh:"乾媽的家", en:"Godmother's Home · Guanyin Temple", place:"觀音巖", placeEn:"Guanyin Temple", map:"平溪 觀音巖",
   story:"觀音媽是全平溪人的大乾媽，護佑著每個囝仔。",
   storyEn:"Guanyin is godmother to all of Pingxi, watching over every child.",
   hint:"跟我上後山，玩我們囝仔時候最愛的躲貓貓！",
   hintEn:"Follow me up the back hill for our childhood favorite — hide and seek!",
   beats:[
-    {t:"input", key:"couplet",
-      label:"到乾媽家了！抬頭看門口那副對聯，把缺的兩個字合起來填給我——\n上聯：觀望平溪勝地靈光「◯」\n下聯：音傳蓮座楊柳甘露「◯」",
-      ph:"兩個字", accept:["新淨","xinjing","xin jing"], confirmed:true, tip:"一句一個字，合起來是心境的祝福",
-      warm:"答對了！「新淨」——新氣象、心清淨，觀音媽的祝福 🙏",
-      en:{label:"We're at Godmother's home! Look up at the couplet by the door and fill in the two missing characters—\nUpper line: 觀望平溪勝地靈光「◯」\nLower line: 音傳蓮座楊柳甘露「◯」\n(Type the 2 Chinese characters, or romanization “xinjing”.)",
-      ph:"two characters", tip:"one character per line; together they're a blessing of the heart",
-      warm:"Correct! “新淨” (xīn jìng) — a fresh start and a pure heart, Guanyin's blessing 🙏"}},
+    {t:"input", key:"godmother",
+      label:"到乾媽家了！考考你：這位守護全平溪、當大家「大乾媽」的神明，是哪一位？",
+      ph:"神明名號", accept:["觀音","觀音媽","觀世音","觀音菩薩","觀音佛祖","guanyin","guan yin"], confirmed:true, tip:"慈悲的女神，手持淨瓶與楊柳",
+      warm:"沒錯，就是觀音媽！祂是全平溪人的大乾媽，護佑著每個囝仔 🙏",
+      en:{label:"We're at Godmother's home! A question: which deity watches over all of Pingxi as everyone's “big godmother”?",
+      ph:"deity's name", tip:"the compassionate goddess holding a willow sprig and a holy vase",
+      warm:"Exactly — Guanyin! She's the big godmother to all of Pingxi, watching over every child 🙏"}},
     {t:"ye", x:"觀音媽，就是我們全平溪人的「大乾媽」。當年就是因為有這座觀音巖，人才慢慢聚過來、形成聚落。所以每一個平溪囝仔，都是觀音媽的孩子啦！",
-      en:{x:"Guanyin is the “big godmother” of everyone in Pingxi. It was this Guanyin Rock that first drew people here and formed the settlement — so every Pingxi kid is Guanyin's child!"}},
+      en:{x:"Guanyin is the “big godmother” of everyone in Pingxi. It was this Guanyin Temple that first drew people here and formed the settlement — so every Pingxi kid is Guanyin's child!"}},
     {t:"scene"},
     {t:"open", key:"j4", prompt:"在觀音媽面前，靜靜許一個願望吧。（只有你和觀音媽知道，我不偷看）",
       warm:"願望收下了，也悄悄記進你的遊記 🌙",
@@ -596,7 +596,7 @@ const STAGES=[
 
  {n:5, zh:"後山躲貓貓", en:"Hide & Seek · Peace Bell", place:"觀音巖後山・平安鐘", placeEn:"Back Hill · Peace Bell", map:"平溪 觀音巖 平安鐘",
   story:"八仙洞、防空洞、平安鐘——後山藏著小葉最瘋的童年。",
-  storyEn:"Baxian Cave, the air-raid tunnels, the Peace Bell — the back hill holds Toni's wildest childhood.",
+  storyEn:"Eight Spirits Cave, the air-raid tunnels, the Peace Bell — the back hill holds Toni's wildest childhood.",
   hint:"太陽下山啦！去找美雲阿姨做件新衣——門牌 40 號，地圖 6 號！",
   hintEn:"The sun's setting! Go see Auntie Meiyun for a new outfit — door #40, map #6!",
   beats:[
@@ -604,9 +604,9 @@ const STAGES=[
       en:{x:"This hill was our secret base for hide-and-seek as kids! Come, walk it with me and hear my stories with Yunyun and Aren — and snap a few time-travel photos to jump right into our childhood!"}},
     {t:"scene"},
     {t:"ye", x:"先說芸芸。她最愛躲在廟旁邊的「八仙洞」——那其實是日據時期的防空洞，超有歷史！我們小時候最愛蹲在洞裡玩碟仙，嚇得半死又愛玩，哈哈！",
-      en:{x:"First, Yunyun. She loved hiding in “Baxian Cave” by the temple — actually a Japanese-era air-raid shelter, so much history! We'd crouch inside playing the spirit-dish game, scared silly but loving it, haha!"}},
+      en:{x:"First, Yunyun. She loved hiding in “Eight Spirits Cave” by the temple — actually a Japanese-era air-raid shelter, so much history! We'd crouch inside playing the spirit-dish game, scared silly but loving it, haha!"}},
     {t:"photo", slot:"5a", label:"八仙洞・玩碟仙", prompt:"到八仙洞，用趣味相框拍一張「你在洞裡玩碟仙」的穿越畫面！",
-      en:{prompt:"At Baxian Cave, use the fun frame to snap a “you playing the spirit game in the cave” time-travel shot!"}},
+      en:{prompt:"At Eight Spirits Cave, use the fun frame to snap a “you playing the spirit game in the cave” time-travel shot!"}},
     {t:"dex", who:"芸芸"},
     {t:"ye", x:"接著是阿任，那皮蛋最愛躲在「一連好幾個相通的防空洞」裡。你知道嗎？逢年過節，石底村和平溪村的囝仔，就在這裡打一場『鞭炮大戰』！",
       en:{x:"Next, Aren — that rascal loved hiding in a string of connected air-raid tunnels. You know what? Every New Year, the kids of Shidi village and Pingxi village had a “firecracker battle” right here!"}},
@@ -711,8 +711,8 @@ const SLOTS=[
   ["1","平溪火車站","Pingxi Station"],
   ["2","成盈利商店","Chengyingli Store"],
   ["3","新建成百貨行","Xinjiancheng Dept. Store"],
-  ["4","觀音巖","Guanyin Rock"],
-  ["5a","八仙洞・玩碟仙","Baxian Cave · Spirit Game"],
+  ["4","觀音巖","Guanyin Temple"],
+  ["5a","八仙洞・玩碟仙","Eight Spirits Cave · Spirit Game"],
   ["5b","防空洞・鞭炮大戰","Tunnel · Firecracker Battle"],
   ["5c","平安鐘・烤地瓜","Peace Bell · Sweet Potatoes"],
   ["6","美雲布藝・新衣","Meiyun Fabric · New Clothes"],
@@ -1146,7 +1146,7 @@ async function composeEditor(){
 
 /* ---------- 答案判定 ---------- */
 const TRIES={};
-const NORM=s=>(s||'').replace(/[\s，,。.、·・「」（）()／/　]/g,'').trim();
+const NORM=s=>(s||'').toLowerCase().replace(/[\s，,。.、·・「」（）()／/　]/g,'').trim();
 function matchOne(val,accept){const v=NORM(val);if(!v)return false;
   return accept.some(a=>{const n=NORM(a);return n&&(v===n||v.includes(n));});}
 
