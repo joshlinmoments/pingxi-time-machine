@@ -307,6 +307,36 @@ textarea{font-family:inherit}
 .lang-pick button{border:0;background:transparent;color:var(--pine-deep);font-weight:800;font-size:14px;
   padding:7px 16px;border-radius:999px;cursor:pointer;font-family:var(--serif);letter-spacing:.3px}
 .lang-pick button.on{background:var(--pine-deep);color:var(--gold)}
+/* 封面次要連結 */
+.cover-link{display:inline-block;margin-top:14px;background:none;border:0;color:var(--pine-deep);
+  font-weight:800;font-size:14px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:var(--serif)}
+/* 紀錄 & 留言牆 */
+#board{position:fixed;inset:0;z-index:60;display:none}
+#board.on{display:block}
+#board .bg{position:absolute;inset:0;background:rgba(20,31,25,.55);backdrop-filter:blur(2px)}
+#board .sheet{position:absolute;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--pine-deep);
+  border-radius:22px 22px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom,0));box-shadow:0 -12px 40px rgba(0,0,0,.4)}
+#board h3{margin:2px 0 4px;color:var(--cream);font-family:var(--serif);font-size:20px;display:flex;align-items:center;gap:8px}
+#board .bd-close{margin-left:auto;background:rgba(244,239,224,.12);border:0;color:var(--cream);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer}
+#board .bd-sub{color:rgba(244,239,224,.6);font-size:12.5px;margin-bottom:14px}
+.bd-stats{display:flex;gap:10px;margin-bottom:14px}
+.bd-stat{flex:1;background:rgba(255,207,63,.1);border:1px solid rgba(255,207,63,.35);border-radius:14px;padding:12px;text-align:center}
+.bd-stat .big{color:var(--gold);font-size:26px;font-weight:900;font-family:var(--serif);line-height:1.1}
+.bd-stat .lb{color:rgba(244,239,224,.72);font-size:11.5px;margin-top:3px}
+.bd-h4{color:var(--gold);font-weight:800;font-size:13px;letter-spacing:.5px;margin:16px 0 8px;font-family:var(--serif)}
+.play-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(244,239,224,.06);border-radius:12px;margin-bottom:7px}
+.play-row .pn{color:var(--cream);font-weight:800;font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.play-row .pd{color:rgba(244,239,224,.6);font-size:11.5px;text-align:right;line-height:1.35}
+.play-row .pd b{color:var(--gold);font-weight:800}
+.msg-form{background:rgba(244,239,224,.06);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:14px}
+.msg-form input,.msg-form textarea{width:100%;box-sizing:border-box;background:rgba(20,31,25,.5);border:1px solid rgba(244,239,224,.2);
+  border-radius:10px;color:var(--cream);padding:10px 12px;font-size:14px;font-family:var(--font);margin-bottom:8px}
+.msg-form textarea{min-height:64px;resize:vertical}
+.msg-card{background:rgba(244,239,224,.06);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:10px 14px;margin-bottom:8px}
+.msg-card .mn{color:var(--gold);font-weight:800;font-size:13.5px}
+.msg-card .mt{color:var(--cream);font-size:14px;line-height:1.55;margin-top:3px;white-space:pre-wrap;word-break:break-word}
+.msg-card .md{color:rgba(244,239,224,.45);font-size:11px;margin-top:5px}
+.bd-empty{color:rgba(244,239,224,.5);font-size:13px;text-align:center;padding:16px}
 </style>
 </head>
 <body>
@@ -332,6 +362,7 @@ textarea{font-family:inherit}
       <span class="tag" id="coverTag">平溪老街尋寶走讀</span>
       <p id="coverP">跟著平溪最強嚮導「小葉」，一站一站走進老街，<br>用五感、相機與趣味相框，穿越回到平溪的那些年。</p>
       <button class="cta" id="coverCta" onclick="go('intro')">開始走讀 →</button>
+      <button class="cover-link" id="coverBoard" onclick="openBoard()">📜 紀錄 & 留言牆</button>
     </div>
   </section>
 
@@ -371,6 +402,7 @@ textarea{font-family:inherit}
     <div style="width:100%;margin-top:18px">
       <button class="btn" id="dlBtn" onclick="downloadPostcard()">📥 存明信片到相簿</button>
       <button class="btn ghost" id="bagBtnFin" onclick="openBag()">🎒 背包 · 圖鑑 · 相簿</button>
+      <button class="btn ghost" id="boardBtnFin" onclick="openBoard()">📜 紀錄 & 留言牆</button>
       <button class="btn ghost" id="restartBtn" onclick="restart()">重新開始</button>
     </div>
   </section>
@@ -404,6 +436,28 @@ textarea{font-family:inherit}
     <div class="ed-actions">
       <button class="btn ghost sm" id="edCancel" onclick="editorCancel()">用原圖</button>
       <button class="btn sm" id="edDone" onclick="editorDone()">完成 ✓</button>
+    </div>
+  </div>
+
+  <!-- 紀錄 & 留言牆 -->
+  <div id="board">
+    <div class="bg" onclick="closeBoard()"></div>
+    <div class="sheet">
+      <h3><span id="boardTitle">📜 紀錄 & 留言牆</span><button class="bd-close" onclick="closeBoard()">✕</button></h3>
+      <div class="bd-sub" id="boardSub">看看有誰來玩過，也留下你的心情 ✨</div>
+      <div class="bd-stats">
+        <div class="bd-stat"><div class="big" id="statPlays">—</div><div class="lb" id="statPlaysLb">總遊玩人次</div></div>
+        <div class="bd-stat"><div class="big" id="statAvg">—</div><div class="lb" id="statAvgLb">平均完成時間</div></div>
+      </div>
+      <div class="bd-h4" id="boardH4Play">🚂 最近玩過的旅人</div>
+      <div id="playList"><div class="bd-empty" id="playEmpty">尚無紀錄</div></div>
+      <div class="bd-h4" id="boardH4Msg">💬 留言牆</div>
+      <div class="msg-form">
+        <input id="msgName" maxlength="24" placeholder="你的名字 / Your name">
+        <textarea id="msgText" maxlength="300" placeholder="寫下你此刻的心情… / Share how you feel…"></textarea>
+        <button class="btn sm" id="msgSend" onclick="postMsg(this)">送出留言</button>
+      </div>
+      <div id="msgList"><div class="bd-empty" id="msgEmpty">還沒有人留言，當第一個吧！</div></div>
     </div>
   </div>
 
@@ -691,7 +745,7 @@ const STAGES=[
 const SAVE="pingxi_time_machine_v3";
 let S=load();
 function load(){try{const o=JSON.parse(localStorage.getItem(SAVE));return o&&o.album&&o.items?o:fresh();}catch(e){return fresh();}}
-function fresh(){return {codename:"",stage:1,answers:{},journal:{},album:{},items:{},dex:{},stamps:[],done:false};}
+function fresh(){return {codename:"",stage:1,answers:{},journal:{},album:{},items:{},dex:{},stamps:[],done:false,startTs:0,logged:false};}
 function save(){try{localStorage.setItem(SAVE,JSON.stringify(S));}catch(e){}}
 
 /* =========================================================
@@ -797,6 +851,27 @@ const UI={
   postcardEmpty1:{zh:"這趟還沒拍照——回去邊玩邊拍，",en:"No photos yet — go back, play and snap along,"},
   postcardEmpty2:{zh:"就會長出你專屬的平溪明信片！",en:"and your own Pingxi postcard will grow!"},
   postcardCertify:{zh:(d,n)=>"平溪囝仔認證 · "+d+" · 打卡 "+n+"/7",en:(d,n)=>"Certified Pingxi Kid · "+d+" · check-ins "+n+"/7"},
+  boardLink:{zh:"📜 紀錄 & 留言牆",en:"📜 Log & Messages"},
+  boardTitle:{zh:"📜 紀錄 & 留言牆",en:"📜 Log & Messages"},
+  boardSub:{zh:"看看有誰來玩過，也留下你的心情 ✨",en:"See who's played, and leave how you felt ✨"},
+  statPlaysLb:{zh:"總遊玩人次",en:"Total plays"},
+  statAvgLb:{zh:"平均完成時間",en:"Avg. finish time"},
+  boardH4Play:{zh:"🚂 最近玩過的旅人",en:"🚂 Recent travelers"},
+  boardH4Msg:{zh:"💬 留言牆",en:"💬 Message wall"},
+  playEmpty:{zh:"尚無紀錄——當第一位完成的旅人吧！",en:"No records yet — be the first to finish!"},
+  msgEmpty:{zh:"還沒有人留言，當第一個吧！",en:"No messages yet — be the first!"},
+  msgNamePh:{zh:"你的名字 / Your name",en:"Your name"},
+  msgTextPh:{zh:"寫下你此刻的心情…",en:"Share how you feel right now…"},
+  msgSend:{zh:"送出留言",en:"Post message"},
+  msgSending:{zh:"送出中…",en:"Posting…"},
+  msgNeedText:{zh:"先寫幾個字再送出吧 🙂",en:"Write a few words first 🙂"},
+  msgFail:{zh:"送出失敗，請稍後再試",en:"Failed to post — please try again"},
+  boardOffline:{zh:"（尚未連線到資料庫）",en:"(not connected to the database)"},
+  anon:{zh:"平溪小旅人",en:"A Pingxi traveler"},
+  durFmt:{zh:(h,m)=>(h?h+" 時 ":"")+m+" 分",en:(h,m)=>(h?h+"h ":"")+m+"m"},
+  justNow:{zh:"剛剛",en:"just now"},
+  minsAgo:{zh:n=>n+" 分鐘前",en:n=>n+" min ago"},
+  hoursAgo:{zh:n=>n+" 小時前",en:n=>n+"h ago"},
 };
 function T(key){const o=UI[key];return o?(EN()?(o.en!=null?o.en:o.zh):o.zh):'';}
 function defName(){return S.codename||T('defaultName');}
@@ -822,6 +897,16 @@ function applyStaticI18n(){
   set('tabItems',T('tabItems')); set('tabStamp',T('tabStamp')); set('tabDex',T('tabDex')); set('tabAlbum',T('tabAlbum'));
   set('edTitle',T('editorTitle')); set('edHint',T('editorHint'));
   set('edCancel',T('editorUseOrig')); set('edDone',T('editorDone'));
+  // 紀錄 & 留言牆
+  set('coverBoard',T('boardLink')); set('boardBtnFin',T('boardLink'));
+  set('boardTitle',T('boardTitle')); set('boardSub',T('boardSub'));
+  set('statPlaysLb',T('statPlaysLb')); set('statAvgLb',T('statAvgLb'));
+  set('boardH4Play',T('boardH4Play')); set('boardH4Msg',T('boardH4Msg'));
+  set('msgSend',T('msgSend'));
+  const mn=document.getElementById('msgName'),mt=document.getElementById('msgText');
+  if(mn)mn.placeholder=T('msgNamePh'); if(mt)mt.placeholder=T('msgTextPh');
+  const pe=document.getElementById('playEmpty'); if(pe)pe.textContent=T('playEmpty');
+  const me=document.getElementById('msgEmpty'); if(me)me.textContent=T('msgEmpty');
   const adv=document.getElementById('advance'); if(adv&&!adv.classList.contains('hidden'))adv.textContent=T('advance');
   const lz=document.getElementById('langZh'),le=document.getElementById('langEn');
   if(lz&&le){lz.classList.toggle('on',!EN());le.classList.toggle('on',EN());}
@@ -831,6 +916,7 @@ function setLang(l){LANG=l;try{localStorage.setItem('pingxi_lang',l);}catch(e){}
   // 若已在遊戲中，立即用新語言重繪當前關卡
   if(document.getElementById('play').classList.contains('on')) renderStage();
   if(document.getElementById('finale').classList.contains('on')){buildBook();buildPostcard();}
+  if(document.getElementById('board').classList.contains('on')){renderPlays();renderMessages();}
 }
 
 /* ---------- 導覽 ---------- */
@@ -838,7 +924,7 @@ function go(where){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById('topbar').classList.toggle('hidden', where==='cover');
   if(where==='cover'){document.getElementById('cover').classList.add('on');return;}
-  if(where==='intro'){ S.stage=Math.max(S.stage,1); save(); renderStage(); return; }
+  if(where==='intro'){ S.stage=Math.max(S.stage,1); if(!S.startTs)S.startTs=Date.now(); save(); renderStage(); return; }
   if(where==='finale'){ document.getElementById('finale').classList.add('on'); buildBook(); buildPostcard(); renderDots(); window.scrollTo(0,0); return; }
 }
 
@@ -1173,7 +1259,7 @@ function endStage(st,chat){
 }
 function renderFinalBtn(chat){
   if(!S.stamps.includes(7))S.stamps.push(7);
-  S.done=true;save();renderDots();
+  S.done=true;save();renderDots();logPlayOnce();
   const c=document.createElement('div');c.style.padding='10px 0 0';
   c.innerHTML=`<button class="btn brick">${T('finalBtn')}</button>`;chat.appendChild(c);
   c.querySelector('.btn').onclick=()=>go('finale');
@@ -1458,12 +1544,123 @@ async function downloadPostcard(){
 
 function restart(){ if(confirm(T('restartConfirm'))){const keepLang=LANG;S=fresh();save();location.reload();} }
 
+/* =========================================================
+   紀錄 & 留言牆（Firebase RTDB，見頁尾 module）
+   ========================================================= */
+function fmtDur(ms){
+  if(!ms||ms<0)return '—';
+  const m=Math.round(ms/60000); const h=Math.floor(m/60), mm=m%60;
+  return T('durFmt')(h,mm);
+}
+function timeAgo(ts){
+  if(!ts)return '';
+  const diff=Date.now()-ts; const mins=Math.floor(diff/60000);
+  if(mins<1)return T('justNow');
+  if(mins<60)return T('minsAgo')(mins);
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return T('hoursAgo')(hrs);
+  const d=new Date(ts);return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+}
+let PLAYS=[], MSGS=[];
+function logPlayOnce(){
+  if(S.logged)return;
+  const ms=S.startTs?(Date.now()-S.startTs):0;
+  const entry={name:(S.codename||T('anon')).slice(0,24), date:dateStr(), ms, stamps:S.stamps.length, lang:LANG||'zh'};
+  if(window.PXDB&&window.PXDB.ready()){ window.PXDB.logPlay(entry); S.logged=true; save(); }
+}
+function openBoard(){
+  document.getElementById('board').classList.add('on');
+  const mn=document.getElementById('msgName'); if(mn&&!mn.value&&S.codename)mn.value=S.codename;
+  renderPlays(); renderMessages();
+  if(window.PXDB&&window.PXDB.ready()){
+    window.PXDB.watchPlays(list=>{PLAYS=list;renderPlays();});
+    window.PXDB.watchMessages(list=>{MSGS=list;renderMessages();});
+  }
+}
+function closeBoard(){document.getElementById('board').classList.remove('on');}
+function renderPlays(){
+  const offline=!(window.PXDB&&window.PXDB.ready());
+  document.getElementById('statPlays').textContent=offline?'—':PLAYS.length;
+  const withMs=PLAYS.filter(p=>p.ms>0);
+  const avg=withMs.length?Math.round(withMs.reduce((a,p)=>a+p.ms,0)/withMs.length):0;
+  document.getElementById('statAvg').textContent=(offline||!avg)?'—':fmtDur(avg);
+  const list=document.getElementById('playList');
+  if(offline){list.innerHTML=`<div class="bd-empty">${T('boardOffline')}</div>`;return;}
+  if(!PLAYS.length){list.innerHTML=`<div class="bd-empty">${T('playEmpty')}</div>`;return;}
+  list.innerHTML=PLAYS.slice(0,50).map(p=>`<div class="play-row">
+    <div class="pn">🧑 ${escapeHtml(p.name||T('anon'))}</div>
+    <div class="pd">${escapeHtml(p.date||'')}<br><b>${fmtDur(p.ms)}</b> · ${'📍'+(p.stamps||0)+'/7'}</div></div>`).join('');
+}
+function renderMessages(){
+  const offline=!(window.PXDB&&window.PXDB.ready());
+  const list=document.getElementById('msgList');
+  if(offline){list.innerHTML=`<div class="bd-empty">${T('boardOffline')}</div>`;return;}
+  if(!MSGS.length){list.innerHTML=`<div class="bd-empty">${T('msgEmpty')}</div>`;return;}
+  list.innerHTML=MSGS.slice(0,100).map(m=>`<div class="msg-card">
+    <div class="mn">${escapeHtml(m.name||T('anon'))}</div>
+    <div class="mt">${escapeHtml(m.text||'')}</div>
+    <div class="md">${timeAgo(m.ts)}</div></div>`).join('');
+}
+async function postMsg(btn){
+  if(!(window.PXDB&&window.PXDB.ready())){alert(T('boardOffline'));return;}
+  const nameEl=document.getElementById('msgName'), textEl=document.getElementById('msgText');
+  const text=(textEl.value||'').trim();
+  if(!text){alert(T('msgNeedText'));return;}
+  const name=(nameEl.value||'').trim().slice(0,24)||T('anon');
+  const old=btn.textContent; btn.disabled=true; btn.textContent=T('msgSending');
+  try{ await window.PXDB.postMessage({name, text:text.slice(0,300), lang:LANG||'zh'});
+    textEl.value=''; }
+  catch(e){ alert(T('msgFail')); }
+  btn.disabled=false; btn.textContent=T('msgSend');
+}
+
 /* ---------- 啟動 ---------- */
 (function init(){
   const ci=document.getElementById('coverImg');ci.src=SCENE_IMG[1];
   ci.onerror=()=>{ci.style.display='none';document.querySelector('.cover-hero').style.background='linear-gradient(160deg,#3f6151,#1d3128)';};
   applyStaticI18n(); // 依語言與進度套用封面文案、語言鍵
+  // Firebase 連上後：補登尚未記錄的完成紀錄、刷新開著的留言牆
+  window.addEventListener('pxdb-ready',()=>{
+    if(S.done&&!S.logged)logPlayOnce();
+    if(document.getElementById('board').classList.contains('on'))openBoard();
+  });
 })();
+</script>
+
+<!-- ============================================================
+     Firebase 即時資料庫（紀錄 & 留言牆）
+     ▼▼▼ 把新開 Firebase 專案的 firebaseConfig 貼到下面 ▼▼▼
+     （一定要包含 databaseURL 那一行）
+     ============================================================ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, query, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBI3CBXVXJw4ggAWQgUCozW3WfoWVz1ckQ",
+  authDomain: "pingxi-time-machine.firebaseapp.com",
+  databaseURL: "https://pingxi-time-machine-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "pingxi-time-machine",
+  storageBucket: "pingxi-time-machine.firebasestorage.app",
+  messagingSenderId: "542468121443",
+  appId: "1:542468121443:web:83df62a272276156082956"
+};
+
+let db=null;
+try{
+  if(firebaseConfig.databaseURL && firebaseConfig.databaseURL.indexOf('PASTE_HERE')<0){
+    const app=initializeApp(firebaseConfig); db=getDatabase(app);
+  }
+}catch(e){ console.warn('Firebase init failed:', e); }
+
+window.PXDB={
+  ready:()=>!!db,
+  logPlay:(data)=>{ if(!db)return; try{ push(ref(db,'plays'), {...data, ts: Date.now()}); }catch(e){console.warn(e);} },
+  postMessage:(data)=>{ if(!db)return Promise.reject(new Error('offline')); return push(ref(db,'messages'), {...data, ts: Date.now()}); },
+  watchPlays:(cb)=>{ if(!db)return; onValue(query(ref(db,'plays'), limitToLast(200)), s=>{ const v=s.val()||{}; cb(Object.values(v).sort((a,b)=>(b.ts||0)-(a.ts||0))); }); },
+  watchMessages:(cb)=>{ if(!db)return; onValue(query(ref(db,'messages'), limitToLast(200)), s=>{ const v=s.val()||{}; cb(Object.values(v).sort((a,b)=>(b.ts||0)-(a.ts||0))); }); },
+};
+window.dispatchEvent(new Event('pxdb-ready'));
 </script>
 </body>
 </html>
