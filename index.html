@@ -337,6 +337,21 @@ textarea{font-family:inherit}
 .msg-card .mt{color:var(--cream);font-size:14px;line-height:1.55;margin-top:3px;white-space:pre-wrap;word-break:break-word}
 .msg-card .md{color:rgba(244,239,224,.45);font-size:11px;margin-top:5px}
 .bd-empty{color:rgba(244,239,224,.5);font-size:13px;text-align:center;padding:16px}
+/* 結尾選獎品 */
+.reward-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 12px}
+.reward-card{background:rgba(244,239,224,.05);border:2px solid var(--line);border-radius:16px;padding:12px 10px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;transition:.15s}
+.reward-card img{width:84px;height:84px;object-fit:contain}
+.reward-card .rc-name{font-weight:800;color:var(--cream);font-size:15px;font-family:var(--serif)}
+.reward-card .rc-desc{font-size:11.5px;color:rgba(244,239,224,.72);line-height:1.4}
+.reward-card.on{border-color:var(--gold);background:rgba(255,207,63,.14);box-shadow:0 4px 14px rgba(232,178,32,.25)}
+.reward-card:disabled{opacity:.55;cursor:default}
+.confirm-reward:disabled{opacity:.5}
+.reward-banner{display:flex;align-items:center;gap:12px;background:rgba(255,207,63,.12);border:1px solid rgba(255,207,63,.45);
+  border-radius:14px;padding:11px 14px;margin:2px 0 14px}
+.reward-banner img{width:46px;height:46px;object-fit:contain;flex:0 0 auto}
+.reward-banner .rb-main{color:var(--gold);font-weight:800;font-size:15px;font-family:var(--serif)}
+.reward-banner .rb-sub{color:var(--cream);font-size:12px;margin-top:2px;opacity:.85}
 </style>
 </head>
 <body>
@@ -382,6 +397,7 @@ textarea{font-family:inherit}
   <!-- 平溪寫真書 -->
   <section class="screen" id="finale">
     <div class="fin-title"><span id="finTitle">📖 我的平溪寫真書</span><small id="jbSub"></small></div>
+    <div id="rewardBanner" class="reward-banner" hidden></div>
     <div class="book-wrap">
       <div class="book" id="book"></div>
       <button class="book-nav prev" onclick="flipBook(-1)" aria-label="prev">‹</button>
@@ -492,6 +508,17 @@ const ITEM_IMG={
   "新衣":"slides/stickers/item-newclothes.webp",
 };
 
+/* ---------- 結尾獎品（二選一） ---------- */
+const REWARDS=[
+  {id:"taro", zh:"平溪芋圓", en:"Pingxi Taro Balls", img:"slides/stickers/st-tarobowl.webp",
+    descZh:"熱呼呼、Q 彈的招牌芋圓，小葉請客 🍠", descEn:"A hot bowl of chewy signature taro balls, on Toni 🍠"},
+  {id:"lantern", zh:"花布小天燈", en:"Floral Mini Sky Lantern", img:"slides/stickers/reward-lantern.webp",
+    descZh:"平溪限定手作花布天燈吊飾，把祝福帶回家 🏮", descEn:"A Pingxi handmade floral-fabric sky-lantern charm — take the blessing home 🏮"},
+];
+function rewardById(id){return REWARDS.find(r=>r.id===id);}
+function rewardName(r){return r?(EN()?r.en:r.zh):'';}
+function rewardDesc(r){return r?(EN()?r.descEn:r.descZh):'';}
+
 /* ---------- 圖鑑主檔 ---------- */
 const CHAR_IMG={
   "芸芸":"slides/stickers/char-yunyun.webp",
@@ -580,9 +607,10 @@ const STAGES=[
   hint:"平溪人的百貨天堂「新建成百貨行」，地圖 3 號！",
   hintEn:"Pingxi folks' department-store heaven, “Xinjiancheng”, map #3!",
   beats:[
-    {t:"input", key:"store2", label:"到囉！看看門口的地址，這家店是幾號？把號碼打給我。", ph:"號碼",
-      accept:["1","公園街1號","公園街一號","公園街1"], confirmed:true, tip:"門口的地址是「公園街◯號」", warm:"沒錯，公園街 1 號！這間柑仔店我從小逛到大，超有感情 😎",
+    {t:"input", key:"store2", label:"到囉！看看招牌，把這家店的名字打給我（三個字）。", ph:"店名",
+      accept:["成盈利"], confirmed:true, tip:"招牌上金金亮亮那三個字", warm:"沒錯，就是「成盈利」！這間柑仔店，我從小逛到大，超有感情 😎",
       en:{label:"Here we are! Check the address by the door — what's this shop's street number? Type the number.", ph:"number",
+      accept:["1","公園街1號","公園街一號","park street 1","no.1","no 1"],
       tip:"the address reads “No. ◯, Park Street” (公園街◯號)", warm:"That's it — No. 1, Park Street! I've shopped here since I was a kid 😎"}},
     {t:"ye", x:"你別看它小，以前庄裡的人半夜嘴饞、缺瓶醬油，敲敲門阿伯就開門——所以我們都笑說它是「平溪的 24 小時便利商店」！",
       en:{x:"Don't let its size fool you — back in the day, when villagers got a midnight craving or ran out of soy sauce, they'd knock and the owner would open up. That's why we call it “Pingxi's 24-hour convenience store”!"}},
@@ -629,11 +657,11 @@ const STAGES=[
   hintEn:"Follow me up the back hill for our childhood favorite — hide and seek!",
   beats:[
     {t:"input", key:"godmother",
-      label:"到乾媽家了！考考你：這位守護全平溪、當大家「大乾媽」的神明，是哪一位？",
-      ph:"神明名號", accept:["觀音","觀音媽","觀世音","觀音菩薩","觀音佛祖","guanyin","guan yin"], confirmed:true, tip:"慈悲的女神，手持淨瓶與楊柳",
-      warm:"沒錯，就是觀音媽！祂是全平溪人的大乾媽，護佑著每個囝仔 🙏",
+      label:"到乾媽家了！抬頭看門口那副對聯，把缺的兩個字合起來填給我——\n上聯：觀望平溪勝地靈光「◯」\n下聯：音傳蓮座楊柳甘露「◯」",
+      ph:"兩個字", accept:["新淨"], confirmed:true, tip:"一句一個字，合起來是心境的祝福",
+      warm:"答對了！「新淨」——新氣象、心清淨，觀音媽的祝福 🙏",
       en:{label:"We're at Godmother's home! A question: which deity watches over all of Pingxi as everyone's “big godmother”?",
-      ph:"deity's name", tip:"the compassionate goddess holding a willow sprig and a holy vase",
+      ph:"deity's name", accept:["guanyin","guan yin","觀音","觀音媽","觀世音"], tip:"the compassionate goddess holding a willow sprig and a holy vase",
       warm:"Exactly — Guanyin! She's the big godmother to all of Pingxi, watching over every child 🙏"}},
     {t:"ye", x:"觀音媽，就是我們全平溪人的「大乾媽」。當年就是因為有這座觀音巖，人才慢慢聚過來、形成聚落。所以每一個平溪囝仔，都是觀音媽的孩子啦！",
       en:{x:"Guanyin is the “big godmother” of everyone in Pingxi. It was this Guanyin Temple that first drew people here and formed the settlement — so every Pingxi kid is Guanyin's child!"}},
@@ -735,8 +763,9 @@ const STAGES=[
       en:{prompt:"At journey's end, write a line for this trip “back to old Pingxi” — and for Toni too.",
       warm:"Got it! This will be the most beautiful ending to your diary 💌"}},
     {t:"stamp"},
-    {t:"ye", x:"小葉請客！把這個完成畫面拿給小葉本人看——我就帶你去吃平溪最道地的芋圓！🍠",
-      en:{x:"Toni's treat! Show this finished screen to Toni himself — and I'll take you for the most authentic taro balls in Pingxi! 🍠"}},
+    {t:"ye", x:"小葉請客！走完全程，你可以挑一樣『平溪囝仔限定』小禮物——選好之後，把這個完成畫面拿給小葉本人看，就能兌換囉！",
+      en:{x:"Toni's treat! For finishing the whole walk, pick one “Pingxi Kids” keepsake — then show this finished screen to Toni himself to redeem it!"}},
+    {t:"reward"},
     {t:"final"},
   ]},
 ];
@@ -745,7 +774,7 @@ const STAGES=[
 const SAVE="pingxi_time_machine_v3";
 let S=load();
 function load(){try{const o=JSON.parse(localStorage.getItem(SAVE));return o&&o.album&&o.items?o:fresh();}catch(e){return fresh();}}
-function fresh(){return {codename:"",stage:1,answers:{},journal:{},album:{},items:{},dex:{},stamps:[],done:false,startTs:0,logged:false};}
+function fresh(){return {codename:"",stage:1,answers:{},journal:{},album:{},items:{},dex:{},stamps:[],done:false,startTs:0,logged:false,reward:""};}
 function save(){try{localStorage.setItem(SAVE,JSON.stringify(S));}catch(e){}}
 
 /* =========================================================
@@ -872,6 +901,12 @@ const UI={
   justNow:{zh:"剛剛",en:"just now"},
   minsAgo:{zh:n=>n+" 分鐘前",en:n=>n+" min ago"},
   hoursAgo:{zh:n=>n+" 小時前",en:n=>n+"h ago"},
+  rewardH:{zh:"選擇你的獎品 🎁",en:"Choose your reward 🎁"},
+  rewardQ:{zh:"走完全程的限定好禮，二選一：",en:"A finisher's keepsake — pick one:"},
+  rewardConfirm:{zh:"確認選擇 →",en:"Confirm choice →"},
+  rewardPick:{zh:n=>"好眼光！你選了「"+n+"」🎁 把這個完成畫面拿給小葉本人，就能兌換囉！",en:n=>"Great pick! You chose “"+n+"” 🎁 Show this finished screen to Toni to redeem it!"},
+  rewardBanner:{zh:n=>"🎁 你選的獎品：「"+n+"」",en:n=>"🎁 Your reward: “"+n+"”"},
+  rewardBannerSub:{zh:"把這個完成畫面拿給小葉本人兌換",en:"Show this finished screen to Toni to redeem"},
 };
 function T(key){const o=UI[key];return o?(EN()?(o.en!=null?o.en:o.zh):o.zh):'';}
 function defName(){return S.codename||T('defaultName');}
@@ -915,7 +950,7 @@ function setLang(l){LANG=l;try{localStorage.setItem('pingxi_lang',l);}catch(e){}
   applyStaticI18n();
   // 若已在遊戲中，立即用新語言重繪當前關卡
   if(document.getElementById('play').classList.contains('on')) renderStage();
-  if(document.getElementById('finale').classList.contains('on')){buildBook();buildPostcard();}
+  if(document.getElementById('finale').classList.contains('on')){buildBook();buildPostcard();renderRewardBanner();}
   if(document.getElementById('board').classList.contains('on')){renderPlays();renderMessages();}
 }
 
@@ -925,7 +960,7 @@ function go(where){
   document.getElementById('topbar').classList.toggle('hidden', where==='cover');
   if(where==='cover'){document.getElementById('cover').classList.add('on');return;}
   if(where==='intro'){ S.stage=Math.max(S.stage,1); if(!S.startTs)S.startTs=Date.now(); save(); renderStage(); return; }
-  if(where==='finale'){ document.getElementById('finale').classList.add('on'); buildBook(); buildPostcard(); renderDots(); window.scrollTo(0,0); return; }
+  if(where==='finale'){ document.getElementById('finale').classList.add('on'); buildBook(); buildPostcard(); renderRewardBanner(); renderDots(); window.scrollTo(0,0); return; }
 }
 
 /* ---------- 進度點 + 收藏數 ---------- */
@@ -1001,6 +1036,7 @@ function playBeat(st,i,chat){
     case 'choice': hideAdvance(); renderChoice(b,st,chat,cont); break;
     case 'photo': hideAdvance(); renderPhoto(b,st,chat,cont); break;
     case 'use': hideAdvance(); renderUse(b,st,chat,cont); break;
+    case 'reward': hideAdvance(); renderReward(b,st,chat,cont); break;
     case 'final': hideAdvance(); renderFinalBtn(chat); break;
     default: showAdvance(cont);
   }
@@ -1026,21 +1062,22 @@ function renderInput(b,st,chat,cont){
   box.querySelector('.btn').onclick=()=>{
     const val=(input.value||'').trim(); S.answers[b.key]=val;
     if(b.key==='codename'){ if(!val){alert(T('codenameEmpty'));return;} S.codename=val; }
-    if(b.accept&&b.confirmed){
-      const ok=matchOne(val,b.accept);
+    const acc=bx(b,'accept');
+    if(acc&&b.confirmed){
+      const ok=matchOne(val,acc);
       input.classList.toggle('bad',!ok);
       const oldW=box.querySelector('.reveal.wrong'); if(oldW)oldW.remove();
       if(!ok){
         TRIES[b.key]=(TRIES[b.key]||0)+1;
         const msg=TRIES[b.key]>=3
-          ? T('reveal3')(b.accept[0])
+          ? T('reveal3')(acc[0])
           : `${T('wrongHead')}${tip?(T('tipPrefix')+tip+'。'):''}${T('wrongMust')}`;
         box.insertAdjacentHTML('beforeend',`<div class="reveal wrong">❌ ${msg}</div>`);scrollChat();return;
       }
     }
     save(); input.disabled=true; box.querySelector('.btn').classList.add('hidden');
     const oldW=box.querySelector('.reveal.wrong'); if(oldW)oldW.remove();
-    if(b.accept&&b.confirmed) box.insertAdjacentHTML('beforeend',`<div class="reveal right">${T('revealRight')}</div>`);
+    if(acc&&b.confirmed) box.insertAdjacentHTML('beforeend',`<div class="reveal right">${T('revealRight')}</div>`);
     if(bx(b,'warm')) appendYe(chat,bx(b,'warm'));
     cont();
   };
@@ -1097,6 +1134,36 @@ function renderUse(b,st,chat,cont){
     S.items[b.need]='used'; save();
     box.querySelector('.btn').disabled=true;
     if(bx(b,'x')) appendNarr(chat,bx(b,'x'));
+    cont();
+  };
+  scrollChat();
+}
+
+/* ---- 互動：選擇結尾獎品 ---- */
+function renderReward(b,st,chat,cont){
+  const box=document.createElement('div');box.className='task';
+  let sel=S.reward||'';
+  box.innerHTML=`<h4>${T('rewardH')}</h4><div class="q">${T('rewardQ')}</div>
+    <div class="reward-opts">${REWARDS.map(r=>`
+      <button type="button" class="reward-card${sel===r.id?' on':''}" data-id="${r.id}">
+        <img src="${r.img}" alt="" onerror="this.style.display='none'">
+        <div class="rc-name">${rewardName(r)}</div>
+        <div class="rc-desc">${rewardDesc(r)}</div>
+      </button>`).join('')}</div>
+    <button class="btn confirm-reward"${sel?'':' disabled'}>${T('rewardConfirm')}</button>`;
+  chat.appendChild(box);
+  const confirm=box.querySelector('.confirm-reward');
+  box.querySelectorAll('.reward-card').forEach(btn=>btn.onclick=()=>{
+    sel=btn.dataset.id;
+    box.querySelectorAll('.reward-card').forEach(x=>x.classList.toggle('on',x===btn));
+    confirm.disabled=false;
+  });
+  confirm.onclick=()=>{
+    if(!sel)return;
+    S.reward=sel; save();
+    box.querySelectorAll('.reward-card').forEach(x=>x.disabled=true);
+    confirm.classList.add('hidden');
+    appendYe(chat, T('rewardPick')(rewardName(rewardById(sel))));
     cont();
   };
   scrollChat();
@@ -1256,6 +1323,15 @@ function endStage(st,chat){
   cont.innerHTML=`<button class="btn">${T('goStage')(st.n+1)}</button>`;chat.appendChild(cont);
   cont.querySelector('.btn').onclick=nextStage;
   scrollChat(true);
+}
+function renderRewardBanner(){
+  const el=document.getElementById('rewardBanner'); if(!el)return;
+  const r=rewardById(S.reward);
+  if(!r){el.hidden=true;return;}
+  el.hidden=false;
+  el.innerHTML=`<img src="${r.img}" alt="" onerror="this.style.display='none'">
+    <div><div class="rb-main">${T('rewardBanner')(rewardName(r))}</div>
+    <div class="rb-sub">${T('rewardBannerSub')}</div></div>`;
 }
 function renderFinalBtn(chat){
   if(!S.stamps.includes(7))S.stamps.push(7);
@@ -1565,7 +1641,7 @@ let PLAYS=[], MSGS=[];
 function logPlayOnce(){
   if(S.logged)return;
   const ms=S.startTs?(Date.now()-S.startTs):0;
-  const entry={name:(S.codename||T('anon')).slice(0,24), date:dateStr(), ms, stamps:S.stamps.length, lang:LANG||'zh'};
+  const entry={name:(S.codename||T('anon')).slice(0,24), date:dateStr(), ms, stamps:S.stamps.length, lang:LANG||'zh', reward:S.reward||''};
   if(window.PXDB&&window.PXDB.ready()){ window.PXDB.logPlay(entry); S.logged=true; save(); }
 }
 function openBoard(){
@@ -1587,9 +1663,13 @@ function renderPlays(){
   const list=document.getElementById('playList');
   if(offline){list.innerHTML=`<div class="bd-empty">${T('boardOffline')}</div>`;return;}
   if(!PLAYS.length){list.innerHTML=`<div class="bd-empty">${T('playEmpty')}</div>`;return;}
-  list.innerHTML=PLAYS.slice(0,50).map(p=>`<div class="play-row">
+  list.innerHTML=PLAYS.slice(0,50).map(p=>{
+    const r=rewardById(p.reward);
+    const rtxt=r?`<br>🎁 ${escapeHtml(rewardName(r))}`:'';
+    return `<div class="play-row">
     <div class="pn">🧑 ${escapeHtml(p.name||T('anon'))}</div>
-    <div class="pd">${escapeHtml(p.date||'')}<br><b>${fmtDur(p.ms)}</b> · ${'📍'+(p.stamps||0)+'/7'}</div></div>`).join('');
+    <div class="pd">${escapeHtml(p.date||'')}<br><b>${fmtDur(p.ms)}</b> · ${'📍'+(p.stamps||0)+'/7'}${rtxt}</div></div>`;
+  }).join('');
 }
 function renderMessages(){
   const offline=!(window.PXDB&&window.PXDB.ready());
