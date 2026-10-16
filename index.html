@@ -128,6 +128,8 @@ textarea{font-family:inherit}
 .task{background:rgba(244,239,224,.08);border:1px solid var(--line);border-left:4px solid var(--gold);
   border-radius:14px;padding:14px 15px;margin:6px 0;opacity:0;transform:translateY(10px);animation:pop .4s ease forwards}
 .task h4{margin:0 0 8px;font-size:12px;letter-spacing:2px;color:var(--gold)}
+.task .clue-img{display:block;width:72%;max-width:260px;margin:4px auto 10px;border-radius:14px;
+  background:rgba(244,239,224,.06);padding:8px}
 .q{font-size:15px;font-weight:600;margin:2px 0 10px;color:var(--cream);white-space:pre-line}
 .field{margin:10px 0}
 .field label{display:block;font-size:13px;color:rgba(244,239,224,.82);margin-bottom:6px;letter-spacing:.5px;white-space:pre-line}
@@ -302,14 +304,16 @@ textarea{font-family:inherit}
 .ed-actions{display:flex;gap:10px}
 .ed-actions .btn{margin-top:0}
 /* 語言切換（首頁） */
-.lang-pick{display:inline-flex;gap:6px;background:rgba(20,31,25,.06);border:1px solid var(--line);
-  border-radius:999px;padding:4px;margin:0 auto 14px}
-.lang-pick button{border:0;background:transparent;color:var(--pine-deep);font-weight:800;font-size:14px;
-  padding:7px 16px;border-radius:999px;cursor:pointer;font-family:var(--serif);letter-spacing:.3px}
-.lang-pick button.on{background:var(--pine-deep);color:var(--gold)}
-/* 封面次要連結 */
-.cover-link{display:inline-block;margin-top:14px;background:none;border:0;color:var(--pine-deep);
-  font-weight:800;font-size:14px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:var(--serif)}
+.lang-pick{display:flex;width:max-content;gap:6px;background:rgba(244,239,224,.1);border:1px solid rgba(244,239,224,.28);
+  border-radius:999px;padding:4px;margin:0 auto 16px}
+.lang-pick button{border:0;background:transparent;color:rgba(244,239,224,.92);font-weight:800;font-size:14px;
+  padding:7px 18px;border-radius:999px;cursor:pointer;font-family:var(--serif);letter-spacing:.3px}
+.lang-pick button.on{background:var(--gold);color:var(--pine-deep);box-shadow:0 2px 8px rgba(255,207,63,.3)}
+/* 封面次要大按鈕（紀錄 & 留言牆）— 明顯但不搶主 CTA */
+.cover-link{display:block;width:100%;margin-top:12px;padding:14px;border-radius:16px;
+  background:rgba(244,239,224,.1);border:1.5px solid rgba(244,239,224,.32);color:var(--cream);
+  font-weight:800;font-size:15.5px;cursor:pointer;font-family:var(--serif);letter-spacing:.5px}
+.cover-link:active{transform:translateY(2px) scale(.99);background:rgba(244,239,224,.16)}
 /* 紀錄 & 留言牆 */
 #board{position:fixed;inset:0;z-index:60;display:none}
 #board.on{display:block}
@@ -576,7 +580,7 @@ const STAGES=[
   story:"鐵道山城、天燈故鄉，旅程從這座月台開始。",
   storyEn:"A railway mountain town, home of the sky lanterns — the journey begins on this platform.",
   hint:"牆上開滿花的那家「24 小時柑仔店」，就在地圖 2 號！",
-  hintEn:"That “24-hour corner store” with flowers all over its wall — it's #2 on the map!",
+  hintEn:"That “24-hour convenience store” with flowers all over its wall — it's #2 on the map!",
   beats:[
     {t:"ye", x:"哈囉！我是小葉，平溪土生土長、認證的最強嚮導！這條老街的每塊石頭、每間店，我閉著眼睛都認得。",
       en:{x:"Hi! I'm Toni — born and raised in Pingxi, your certified top guide! Every stone and every shop on this old street, I know with my eyes closed."}},
@@ -598,7 +602,7 @@ const STAGES=[
     {t:"dex", who:"小葉"},
     {t:"stamp"},
     {t:"ye", x:"走吧！先帶你去我最常光顧的那間——牆上開滿花的「24 小時柑仔店」！",
-      en:{x:"Let's go! First I'll take you to my favorite spot — the “24-hour corner store” with flowers all over its wall!"}},
+      en:{x:"Let's go! First I'll take you to my favorite spot — the “24-hour convenience store” with flowers all over its wall!"}},
   ]},
 
  {n:2, zh:"24 小時柑仔店", en:"The 24hr Store · Chengyingli", place:"成盈利商店", placeEn:"Chengyingli Store", map:"平溪 成盈利商店",
@@ -635,7 +639,7 @@ const STAGES=[
   hint:"有觀音、有香火的「觀音巖」，地圖 4 號那棟金碧輝煌建築的 2 樓！",
   hintEn:"“Guanyin Temple”, with its incense and the Goddess — on the 2nd floor of that magnificent building at map #4!",
   beats:[
-    {t:"input", key:"store3", label:"這家沒有門牌～換個方式考你：他們最有人氣的明星商品「潤膚霜」，是什麼「牌」的？（提示：一種白白的極地動物）", ph:"品牌",
+    {t:"input", key:"store3", img:"slides/stickers/polarbear-cream.webp", label:"這家沒有門牌～換個方式考你：他們最有人氣的明星商品「潤膚霜」，是什麼「牌」的？（提示：一種白白的極地動物）", ph:"品牌",
       accept:["白熊","白熊牌","polar bear","polarbear"], confirmed:true, tip:"包裝上有一隻白白的熊，英文 Polar Bear", warm:"答對！「白熊牌潤膚霜」🐻 平溪人家家都有一罐，這就是新建成的招牌貨！",
       en:{label:"No door plate here~ so a different challenge: their most popular star product is a nourishing cream — named after which white Arctic animal brand?", ph:"brand",
       tip:"there's a white bear on the jar — “Polar Bear”", warm:"Correct! “Polar Bear Special Nourishing Cream” 🐻 — a jar in every Pingxi home, Xinjiancheng's signature item!"}},
@@ -661,7 +665,7 @@ const STAGES=[
       ph:"兩個字", accept:["新淨"], confirmed:true, tip:"一句一個字，合起來是心境的祝福",
       warm:"答對了！「新淨」——新氣象、心清淨，觀音媽的祝福 🙏",
       en:{label:"We're at Godmother's home! A question: which deity watches over all of Pingxi as everyone's “big godmother”?",
-      ph:"deity's name", accept:["guanyin","guan yin","觀音","觀音媽","觀世音"], tip:"the compassionate goddess holding a willow sprig and a holy vase",
+      ph:"deity's name", accept:["guanyin","guan yin","kuanyin","kuan yin","kwanyin","kwan yin","quanyin","quan yin","gwanyin","guanin","kuanin","kwanin","guanyim","kuanyim","guanshiyin","kuanshiyin","avalokitesvara","goddess of mercy","觀音","觀音媽","觀世音"], tip:"the compassionate goddess holding a willow sprig and a holy vase",
       warm:"Exactly — Guanyin! She's the big godmother to all of Pingxi, watching over every child 🙏"}},
     {t:"ye", x:"觀音媽，就是我們全平溪人的「大乾媽」。當年就是因為有這座觀音巖，人才慢慢聚過來、形成聚落。所以每一個平溪囝仔，都是觀音媽的孩子啦！",
       en:{x:"Guanyin is the “big godmother” of everyone in Pingxi. It was this Guanyin Temple that first drew people here and formed the settlement — so every Pingxi kid is Guanyin's child!"}},
@@ -1054,7 +1058,9 @@ function showScene(st,chat){
 function renderInput(b,st,chat,cont){
   const box=document.createElement('div');box.className='task';
   const tip=bx(b,'tip');
+  const clue=bx(b,'img');
   box.innerHTML=`<h4>${T('mission')}</h4>
+    ${clue?`<img class="clue-img" src="${clue}" alt="" onerror="this.style.display='none'">`:''}
     <div class="field"><label>${bx(b,'label')}</label><input data-k="${b.key}" placeholder="${bx(b,'ph')||''}"></div>
     <button class="btn">${T('submit')}</button>`;
   chat.appendChild(box);
