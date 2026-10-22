@@ -328,6 +328,17 @@ textarea{font-family:inherit}
 .bd-stat .big{color:var(--gold);font-size:26px;font-weight:900;font-family:var(--serif);line-height:1.1}
 .bd-stat .lb{color:rgba(244,239,224,.72);font-size:11.5px;margin-top:3px}
 .bd-h4{color:var(--gold);font-weight:800;font-size:13px;letter-spacing:.5px;margin:16px 0 8px;font-family:var(--serif)}
+.bd-funnel{background:rgba(244,239,224,.05);border:1px solid rgba(244,239,224,.14);border-radius:14px;padding:10px 12px;margin-bottom:14px}
+.fn-row{display:flex;align-items:baseline;gap:10px;padding:6px 0}
+.fn-row+.fn-row{border-top:1px dashed rgba(244,239,224,.12)}
+.fn-lb{flex:1;color:rgba(244,239,224,.82);font-size:13px;font-weight:700}
+.fn-val{color:var(--gold);font-size:22px;font-weight:900;font-family:var(--serif);line-height:1}
+.fn-pct{color:rgba(244,239,224,.6);font-size:11.5px;min-width:54px;text-align:right}
+.bd-daily{width:100%;border-collapse:collapse;font-size:12.5px}
+.bd-daily th{color:rgba(244,239,224,.6);font-weight:700;text-align:right;padding:5px 6px;border-bottom:1px solid rgba(244,239,224,.16)}
+.bd-daily th:first-child,.bd-daily td:first-child{text-align:left}
+.bd-daily td{color:rgba(244,239,224,.9);padding:5px 6px;border-bottom:1px solid rgba(244,239,224,.07)}
+.bd-daily td.c{color:var(--gold);font-weight:800}
 .play-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(244,239,224,.06);border-radius:12px;margin-bottom:7px}
 .play-row .pn{color:var(--cream);font-weight:800;font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .play-row .pd{color:rgba(244,239,224,.6);font-size:11.5px;text-align:right;line-height:1.35}
@@ -469,6 +480,14 @@ textarea{font-family:inherit}
         <div class="bd-stat"><div class="big" id="statPlays">—</div><div class="lb" id="statPlaysLb">總遊玩人次</div></div>
         <div class="bd-stat"><div class="big" id="statAvg">—</div><div class="lb" id="statAvgLb">平均完成時間</div></div>
       </div>
+      <div class="bd-h4" id="boardH4Funnel">🧭 走讀漏斗</div>
+      <div class="bd-funnel">
+        <div class="fn-row"><span class="fn-lb" id="fnVisitLb">📲 掃碼進站</span><span class="fn-val" id="fnVisit">—</span></div>
+        <div class="fn-row"><span class="fn-lb" id="fnStartLb">🚶 開始走讀</span><span class="fn-val" id="fnStart">—</span><span class="fn-pct" id="fnStartPct"></span></div>
+        <div class="fn-row"><span class="fn-lb" id="fnDoneLb">🏁 完成全程</span><span class="fn-val" id="fnDone">—</span><span class="fn-pct" id="fnDonePct"></span></div>
+      </div>
+      <div class="bd-h4" id="boardH4Daily">📅 每日概況</div>
+      <div id="dailyWrap"></div>
       <div class="bd-h4" id="boardH4Play">🚂 最近玩過的旅人</div>
       <div id="playList"><div class="bd-empty" id="playEmpty">尚無紀錄</div></div>
       <div class="bd-h4" id="boardH4Msg">💬 留言牆</div>
@@ -889,6 +908,16 @@ const UI={
   boardSub:{zh:"看看有誰來玩過，也留下你的心情 ✨",en:"See who's played, and leave how you felt ✨"},
   statPlaysLb:{zh:"總遊玩人次",en:"Total plays"},
   statAvgLb:{zh:"平均完成時間",en:"Avg. finish time"},
+  boardH4Funnel:{zh:"🧭 走讀漏斗",en:"🧭 Visit funnel"},
+  fnVisitLb:{zh:"📲 掃碼進站",en:"📲 Scanned / arrived"},
+  fnStartLb:{zh:"🚶 開始走讀",en:"🚶 Started the walk"},
+  fnDoneLb:{zh:"🏁 完成全程",en:"🏁 Finished"},
+  boardH4Daily:{zh:"📅 每日概況",en:"📅 Daily breakdown"},
+  dailyHDate:{zh:"日期",en:"Date"},
+  dailyHVisit:{zh:"掃碼",en:"Scans"},
+  dailyHStart:{zh:"開始",en:"Starts"},
+  dailyHDone:{zh:"完成",en:"Done"},
+  dailyEmpty:{zh:"尚無造訪資料",en:"No visit data yet"},
   boardH4Play:{zh:"🚂 最近玩過的旅人",en:"🚂 Recent travelers"},
   boardH4Msg:{zh:"💬 留言牆",en:"💬 Message wall"},
   playEmpty:{zh:"尚無紀錄——當第一位完成的旅人吧！",en:"No records yet — be the first to finish!"},
@@ -940,6 +969,9 @@ function applyStaticI18n(){
   set('coverBoard',T('boardLink')); set('boardBtnFin',T('boardLink'));
   set('boardTitle',T('boardTitle')); set('boardSub',T('boardSub'));
   set('statPlaysLb',T('statPlaysLb')); set('statAvgLb',T('statAvgLb'));
+  set('boardH4Funnel',T('boardH4Funnel'));
+  set('fnVisitLb',T('fnVisitLb')); set('fnStartLb',T('fnStartLb')); set('fnDoneLb',T('fnDoneLb'));
+  set('boardH4Daily',T('boardH4Daily'));
   set('boardH4Play',T('boardH4Play')); set('boardH4Msg',T('boardH4Msg'));
   set('msgSend',T('msgSend'));
   const mn=document.getElementById('msgName'),mt=document.getElementById('msgText');
@@ -963,7 +995,7 @@ function go(where){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById('topbar').classList.toggle('hidden', where==='cover');
   if(where==='cover'){document.getElementById('cover').classList.add('on');return;}
-  if(where==='intro'){ S.stage=Math.max(S.stage,1); if(!S.startTs)S.startTs=Date.now(); save(); renderStage(); return; }
+  if(where==='intro'){ S.stage=Math.max(S.stage,1); if(!S.startTs)S.startTs=Date.now(); markStart(); save(); renderStage(); return; }
   if(where==='finale'){ document.getElementById('finale').classList.add('on'); buildBook(); buildPostcard(); renderRewardBanner(); renderDots(); window.scrollTo(0,0); return; }
 }
 
@@ -1643,7 +1675,45 @@ function timeAgo(ts){
   if(hrs<24)return T('hoursAgo')(hrs);
   const d=new Date(ts);return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
 }
-let PLAYS=[], MSGS=[];
+let PLAYS=[], MSGS=[], FUNNEL=[];
+// 漏斗埋點：每台裝置只記一次「掃碼進站」「開始走讀」(以 localStorage 去重，代表不重複人數)
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function markFunnel(ev,flagKey){
+  if(lsGet(flagKey))return;
+  if(window.PXDB&&window.PXDB.ready()&&window.PXDB.logFunnel(ev,LANG||'zh')) lsSet(flagKey,'1');
+}
+function markVisit(){ markFunnel('visit','pxf_visit'); }
+function markStart(){ markFunnel('start','pxf_start'); }
+function dayOf(ts){const d=new Date(ts);return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');}
+function renderFunnel(){
+  const offline=!(window.PXDB&&window.PXDB.ready());
+  const pct=(n,base)=>base?Math.round(n/base*100)+'%':'';
+  const visits=FUNNEL.filter(f=>f.ev==='visit').length;
+  const starts=FUNNEL.filter(f=>f.ev==='start').length;
+  const dones=PLAYS.length;
+  const base=Math.max(visits,starts,dones); // 若有人直接玩沒被記到掃碼，分母取最大避免 >100%
+  const setv=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  setv('fnVisit',offline?'—':visits);
+  setv('fnStart',offline?'—':starts);
+  setv('fnDone',offline?'—':dones);
+  setv('fnStartPct',offline?'':pct(starts,base));
+  setv('fnDonePct',offline?'':pct(dones,base));
+  // 每日概況
+  const wrap=document.getElementById('dailyWrap'); if(!wrap)return;
+  if(offline){wrap.innerHTML=`<div class="bd-empty">${T('boardOffline')}</div>`;return;}
+  const days={};
+  const bump=(day,key)=>{(days[day]=days[day]||{visit:0,start:0,done:0})[key]++;};
+  FUNNEL.forEach(f=>{ if(f.ts&&(f.ev==='visit'||f.ev==='start')) bump(dayOf(f.ts),f.ev); });
+  PLAYS.forEach(p=>{ const day=p.ts?dayOf(p.ts):(p.date||''); if(day) bump(day,'done'); });
+  const keys=Object.keys(days).sort((a,b)=>b.localeCompare(a));
+  if(!keys.length){wrap.innerHTML=`<div class="bd-empty">${T('dailyEmpty')}</div>`;return;}
+  wrap.innerHTML=`<table class="bd-daily"><thead><tr>
+    <th>${T('dailyHDate')}</th><th>${T('dailyHVisit')}</th><th>${T('dailyHStart')}</th><th>${T('dailyHDone')}</th>
+    </tr></thead><tbody>`+
+    keys.map(d=>`<tr><td>${d}</td><td>${days[d].visit||0}</td><td>${days[d].start||0}</td><td class="c">${days[d].done||0}</td></tr>`).join('')+
+    `</tbody></table>`;
+}
 function logPlayOnce(){
   if(S.logged)return;
   const ms=S.startTs?(Date.now()-S.startTs):0;
@@ -1653,10 +1723,11 @@ function logPlayOnce(){
 function openBoard(){
   document.getElementById('board').classList.add('on');
   const mn=document.getElementById('msgName'); if(mn&&!mn.value&&S.codename)mn.value=S.codename;
-  renderPlays(); renderMessages();
+  renderPlays(); renderMessages(); renderFunnel();
   if(window.PXDB&&window.PXDB.ready()){
-    window.PXDB.watchPlays(list=>{PLAYS=list;renderPlays();});
+    window.PXDB.watchPlays(list=>{PLAYS=list;renderPlays();renderFunnel();});
     window.PXDB.watchMessages(list=>{MSGS=list;renderMessages();});
+    window.PXDB.watchFunnel(list=>{FUNNEL=list;renderFunnel();});
   }
 }
 function closeBoard(){document.getElementById('board').classList.remove('on');}
@@ -1707,6 +1778,7 @@ async function postMsg(btn){
   applyStaticI18n(); // 依語言與進度套用封面文案、語言鍵
   // Firebase 連上後：補登尚未記錄的完成紀錄、刷新開著的留言牆
   window.addEventListener('pxdb-ready',()=>{
+    markVisit(); // 掃碼/開啟封面即記一次造訪（每台裝置一次）
     if(S.done&&!S.logged)logPlayOnce();
     if(document.getElementById('board').classList.contains('on'))openBoard();
   });
@@ -1742,7 +1814,9 @@ try{
 window.PXDB={
   ready:()=>!!db,
   logPlay:(data)=>{ if(!db)return; try{ push(ref(db,'plays'), {...data, ts: Date.now()}); }catch(e){console.warn(e);} },
+  logFunnel:(ev,lang)=>{ if(!db)return false; try{ push(ref(db,'funnel'), {ev, lang:lang||'zh', ts: Date.now()}); return true; }catch(e){console.warn(e);return false;} },
   postMessage:(data)=>{ if(!db)return Promise.reject(new Error('offline')); return push(ref(db,'messages'), {...data, ts: Date.now()}); },
+  watchFunnel:(cb)=>{ if(!db)return; onValue(query(ref(db,'funnel'), limitToLast(5000)), s=>{ const v=s.val()||{}; cb(Object.values(v)); }); },
   watchPlays:(cb)=>{ if(!db)return; onValue(query(ref(db,'plays'), limitToLast(200)), s=>{ const v=s.val()||{}; cb(Object.values(v).sort((a,b)=>(b.ts||0)-(a.ts||0))); }); },
   watchMessages:(cb)=>{ if(!db)return; onValue(query(ref(db,'messages'), limitToLast(200)), s=>{ const v=s.val()||{}; cb(Object.values(v).sort((a,b)=>(b.ts||0)-(a.ts||0))); }); },
 };
