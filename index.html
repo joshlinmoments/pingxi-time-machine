@@ -339,6 +339,9 @@ textarea{font-family:inherit}
 .bd-daily th:first-child,.bd-daily td:first-child{text-align:left}
 .bd-daily td{color:rgba(244,239,224,.9);padding:5px 6px;border-bottom:1px solid rgba(244,239,224,.07)}
 .bd-daily td.c{color:var(--gold);font-weight:800}
+.admin-toggle{display:block;width:100%;margin-top:18px;padding:9px;border:none;background:transparent;color:rgba(244,239,224,.34);font-size:12px;letter-spacing:.5px;cursor:pointer}
+.admin-toggle:hover{color:rgba(244,239,224,.6)}
+.admin-toggle.on{color:var(--gold);opacity:.85}
 .play-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(244,239,224,.06);border-radius:12px;margin-bottom:7px}
 .play-row .pn{color:var(--cream);font-weight:800;font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .play-row .pd{color:rgba(244,239,224,.6);font-size:11.5px;text-align:right;line-height:1.35}
@@ -476,18 +479,20 @@ textarea{font-family:inherit}
     <div class="sheet">
       <h3><span id="boardTitle">📜 紀錄 & 留言牆</span><button class="bd-close" onclick="closeBoard()">✕</button></h3>
       <div class="bd-sub" id="boardSub">看看有誰來玩過，也留下你的心情 ✨</div>
-      <div class="bd-stats">
-        <div class="bd-stat"><div class="big" id="statPlays">—</div><div class="lb" id="statPlaysLb">總遊玩人次</div></div>
-        <div class="bd-stat"><div class="big" id="statAvg">—</div><div class="lb" id="statAvgLb">平均完成時間</div></div>
+      <div id="adminSec" hidden>
+        <div class="bd-stats">
+          <div class="bd-stat"><div class="big" id="statPlays">—</div><div class="lb" id="statPlaysLb">總遊玩人次</div></div>
+          <div class="bd-stat"><div class="big" id="statAvg">—</div><div class="lb" id="statAvgLb">平均完成時間</div></div>
+        </div>
+        <div class="bd-h4" id="boardH4Funnel">🧭 走讀漏斗</div>
+        <div class="bd-funnel">
+          <div class="fn-row"><span class="fn-lb" id="fnVisitLb">📲 掃碼進站</span><span class="fn-val" id="fnVisit">—</span></div>
+          <div class="fn-row"><span class="fn-lb" id="fnStartLb">🚶 開始走讀</span><span class="fn-val" id="fnStart">—</span><span class="fn-pct" id="fnStartPct"></span></div>
+          <div class="fn-row"><span class="fn-lb" id="fnDoneLb">🏁 完成全程</span><span class="fn-val" id="fnDone">—</span><span class="fn-pct" id="fnDonePct"></span></div>
+        </div>
+        <div class="bd-h4" id="boardH4Daily">📅 每日概況</div>
+        <div id="dailyWrap"></div>
       </div>
-      <div class="bd-h4" id="boardH4Funnel">🧭 走讀漏斗</div>
-      <div class="bd-funnel">
-        <div class="fn-row"><span class="fn-lb" id="fnVisitLb">📲 掃碼進站</span><span class="fn-val" id="fnVisit">—</span></div>
-        <div class="fn-row"><span class="fn-lb" id="fnStartLb">🚶 開始走讀</span><span class="fn-val" id="fnStart">—</span><span class="fn-pct" id="fnStartPct"></span></div>
-        <div class="fn-row"><span class="fn-lb" id="fnDoneLb">🏁 完成全程</span><span class="fn-val" id="fnDone">—</span><span class="fn-pct" id="fnDonePct"></span></div>
-      </div>
-      <div class="bd-h4" id="boardH4Daily">📅 每日概況</div>
-      <div id="dailyWrap"></div>
       <div class="bd-h4" id="boardH4Play">🚂 最近玩過的旅人</div>
       <div id="playList"><div class="bd-empty" id="playEmpty">尚無紀錄</div></div>
       <div class="bd-h4" id="boardH4Msg">💬 留言牆</div>
@@ -497,6 +502,7 @@ textarea{font-family:inherit}
         <button class="btn sm" id="msgSend" onclick="postMsg(this)">送出留言</button>
       </div>
       <div id="msgList"><div class="bd-empty" id="msgEmpty">還沒有人留言，當第一個吧！</div></div>
+      <button class="admin-toggle" id="adminToggle" onclick="toggleAdmin()">🔑 管理員檢視</button>
     </div>
   </div>
 
@@ -918,6 +924,10 @@ const UI={
   dailyHStart:{zh:"開始",en:"Starts"},
   dailyHDone:{zh:"完成",en:"Done"},
   dailyEmpty:{zh:"尚無造訪資料",en:"No visit data yet"},
+  adminViewBtn:{zh:"🔑 管理員檢視",en:"🔑 Admin view"},
+  adminLockBtn:{zh:"🔒 收起管理數據",en:"🔒 Hide admin data"},
+  adminPrompt:{zh:"請輸入管理員密碼",en:"Enter admin password"},
+  adminWrong:{zh:"密碼錯誤 🔒",en:"Wrong password 🔒"},
   boardH4Play:{zh:"🚂 最近玩過的旅人",en:"🚂 Recent travelers"},
   boardH4Msg:{zh:"💬 留言牆",en:"💬 Message wall"},
   playEmpty:{zh:"尚無紀錄——當第一位完成的旅人吧！",en:"No records yet — be the first to finish!"},
@@ -973,6 +983,7 @@ function applyStaticI18n(){
   set('fnVisitLb',T('fnVisitLb')); set('fnStartLb',T('fnStartLb')); set('fnDoneLb',T('fnDoneLb'));
   set('boardH4Daily',T('boardH4Daily'));
   set('boardH4Play',T('boardH4Play')); set('boardH4Msg',T('boardH4Msg'));
+  if(typeof applyAdminUI==='function')applyAdminUI();
   set('msgSend',T('msgSend'));
   const mn=document.getElementById('msgName'),mt=document.getElementById('msgText');
   if(mn)mn.placeholder=T('msgNamePh'); if(mt)mt.placeholder=T('msgTextPh');
@@ -987,7 +998,7 @@ function setLang(l){LANG=l;try{localStorage.setItem('pingxi_lang',l);}catch(e){}
   // 若已在遊戲中，立即用新語言重繪當前關卡
   if(document.getElementById('play').classList.contains('on')) renderStage();
   if(document.getElementById('finale').classList.contains('on')){buildBook();buildPostcard();renderRewardBanner();}
-  if(document.getElementById('board').classList.contains('on')){renderPlays();renderMessages();}
+  if(document.getElementById('board').classList.contains('on')){renderPlays();renderMessages();renderFunnel();}
 }
 
 /* ---------- 導覽 ---------- */
@@ -1685,6 +1696,21 @@ function markFunnel(ev,flagKey){
 }
 function markVisit(){ markFunnel('visit','pxf_visit'); }
 function markStart(){ markFunnel('start','pxf_start'); }
+// 管理員檢視：鎖住總數/漏斗/每日概況，一般玩家只看旅人＋留言牆
+const ADMIN_PW="0000";
+let ADMIN=lsGet('pxf_admin')==='1';
+function applyAdminUI(){
+  const sec=document.getElementById('adminSec'); if(sec)sec.hidden=!ADMIN;
+  const btn=document.getElementById('adminToggle');
+  if(btn){ btn.textContent=ADMIN?T('adminLockBtn'):T('adminViewBtn'); btn.classList.toggle('on',ADMIN); }
+}
+function toggleAdmin(){
+  if(ADMIN){ ADMIN=false; lsSet('pxf_admin','0'); applyAdminUI(); return; }
+  const pw=prompt(T('adminPrompt'));
+  if(pw==null)return;
+  if(pw.trim()===ADMIN_PW){ ADMIN=true; lsSet('pxf_admin','1'); applyAdminUI(); renderFunnel(); }
+  else alert(T('adminWrong'));
+}
 function dayOf(ts){const d=new Date(ts);return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');}
 function renderFunnel(){
   const offline=!(window.PXDB&&window.PXDB.ready());
@@ -1723,7 +1749,7 @@ function logPlayOnce(){
 function openBoard(){
   document.getElementById('board').classList.add('on');
   const mn=document.getElementById('msgName'); if(mn&&!mn.value&&S.codename)mn.value=S.codename;
-  renderPlays(); renderMessages(); renderFunnel();
+  applyAdminUI(); renderPlays(); renderMessages(); renderFunnel();
   if(window.PXDB&&window.PXDB.ready()){
     window.PXDB.watchPlays(list=>{PLAYS=list;renderPlays();renderFunnel();});
     window.PXDB.watchMessages(list=>{MSGS=list;renderMessages();});
