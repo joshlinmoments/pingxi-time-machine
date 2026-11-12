@@ -370,6 +370,27 @@ textarea{font-family:inherit}
 .reward-banner img{width:46px;height:46px;object-fit:contain;flex:0 0 auto}
 .reward-banner .rb-main{color:var(--gold);font-weight:800;font-size:15px;font-family:var(--serif)}
 .reward-banner .rb-sub{color:var(--cream);font-size:12px;margin-top:2px;opacity:.85}
+/* 完成禮兌換券（直式票券：大圖在上、資訊在下，方便長輩辨認） */
+.voucher{position:relative;margin:4px 0 16px;border-radius:18px;overflow:hidden;
+  background:linear-gradient(135deg,#faf6ea,#f4efe0);color:var(--pine-deep);
+  box-shadow:0 12px 30px rgba(0,0,0,.42);border:2px solid var(--gold-deep)}
+.voucher[hidden]{display:none}
+.vc-top{display:flex;align-items:center;justify-content:center;gap:5px;background:var(--pine-deep);
+  color:var(--gold);font-family:var(--serif);font-weight:800;font-size:12.5px;letter-spacing:1px;
+  padding:8px 12px;text-align:center}
+.vc-art{display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(255,207,63,.18)}
+.vc-art img{width:168px;height:168px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(0,0,0,.22))}
+.vc-perf{position:relative;height:0;border-top:2px dashed rgba(29,49,40,.3)}
+.vc-perf::before,.vc-perf::after{content:"";position:absolute;top:-9px;width:16px;height:16px;
+  background:var(--ink);border-radius:50%}
+.vc-perf::before{left:-9px}.vc-perf::after{right:-9px}
+.vc-main{padding:14px 16px 8px;text-align:center}
+.vc-kicker{font-size:11px;letter-spacing:3px;color:var(--brick);font-weight:800}
+.vc-name{font-family:var(--serif);font-weight:800;font-size:27px;color:var(--pine-deep);margin:3px 0 7px;line-height:1.15}
+.vc-use{font-size:12.5px;color:#5a6b60;line-height:1.6}
+.vc-foot{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;
+  background:rgba(29,49,40,.06);border-top:1px dashed rgba(29,49,40,.22);font-size:10.5px;color:#6a7a6f;text-align:center}
+.vc-foot b{color:var(--pine-deep)}
 </style>
 </head>
 <body>
@@ -952,6 +973,11 @@ const UI={
   rewardPick:{zh:n=>"好眼光！你選了「"+n+"」🎁 把這個完成畫面拿給小葉本人，就能兌換囉！",en:n=>"Great pick! You chose “"+n+"” 🎁 Show this finished screen to Toni to redeem it!"},
   rewardBanner:{zh:n=>"🎁 你選的獎品：「"+n+"」",en:n=>"🎁 Your reward: “"+n+"”"},
   rewardBannerSub:{zh:"把這個完成畫面拿給小葉本人兌換",en:"Show this finished screen to Toni to redeem"},
+  vcTop:{zh:"🎫 平溪囝仔時光機・完成禮",en:"🎫 PINGXI TIME MACHINE · FINISHER'S GIFT"},
+  vcKicker:{zh:"兌換券 · VOUCHER",en:"REDEMPTION VOUCHER"},
+  vcUse:{zh:"憑此畫面向店家兌換一份，每人限兌 1 份。",en:"Show this screen to the shop to redeem one — limit one per person."},
+  vcHost:{zh:"主辦：新北市平溪區平石社區發展協會",en:"By Pingshi Community Dev. Assoc., Pingxi"},
+  vcTag:{zh:"115 新北社造",en:"2026 New Taipei Community"},
 };
 function T(key){const o=UI[key];return o?(EN()?(o.en!=null?o.en:o.zh):o.zh):'';}
 function defName(){return S.codename||T('defaultName');}
@@ -1379,10 +1405,17 @@ function renderRewardBanner(){
   const el=document.getElementById('rewardBanner'); if(!el)return;
   const r=rewardById(S.reward);
   if(!r){el.hidden=true;return;}
-  el.hidden=false;
-  el.innerHTML=`<img src="${r.img}" alt="" onerror="this.style.display='none'">
-    <div><div class="rb-main">${T('rewardBanner')(rewardName(r))}</div>
-    <div class="rb-sub">${T('rewardBannerSub')}</div></div>`;
+  el.className='voucher'; el.hidden=false;
+  el.innerHTML=`
+    <div class="vc-top">${T('vcTop')}</div>
+    <div class="vc-art"><img src="${r.img}" alt="" onerror="this.style.display='none'"></div>
+    <div class="vc-perf"></div>
+    <div class="vc-main">
+      <div class="vc-kicker">${T('vcKicker')}</div>
+      <div class="vc-name">${escapeHtml(rewardName(r))}</div>
+      <div class="vc-use">${T('vcUse')}</div>
+    </div>
+    <div class="vc-foot"><b>${T('vcHost')}</b>・${T('vcTag')}</div>`;
 }
 function renderFinalBtn(chat){
   if(!S.stamps.includes(7))S.stamps.push(7);
